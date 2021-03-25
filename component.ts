@@ -100,9 +100,21 @@ export class Component {
 				this.addToElement(child, element);
 			}
 		} else if (item instanceof Component) {
+			const component = item.render();
+			component.hostingComponent.parent = this;
+			component.hostingComponent.rootNode = component;
+
 			element.appendChild(item.render());
 		} else if (item !== false) {
 			element.appendChild(document.createTextNode(item));
 		}
+	}
+
+	host(parent: HTMLElement) {
+		const root = this.render();
+		this.rootNode = root;
+		this.parent = null;
+
+		parent.appendChild(root);
 	}
 }

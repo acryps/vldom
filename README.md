@@ -17,7 +17,7 @@ Create a component by extending the component class
 
 ```
 export class ExampleComponent extends Component {
-	constuctor() {
+	constructor() {
 		super();
 	}
 
@@ -35,7 +35,7 @@ Let's extends this by creating a recursive component
 
 ```
 export class ExampleRecursiveComponent extends Component {
-	constuctor(private index: number) {
+	constructor(private index: number) {
 		super();
 	}
 
@@ -62,7 +62,7 @@ Component.directives["epic-link"] = (element, value) => {
 }
 
 export class ExampleComponent extends Component {
-	constuctor() {
+	constructor() {
 		super();
 	}
 

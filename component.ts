@@ -14,6 +14,8 @@ export class Component {
 	params: any;
 	parent?: Component;
 	rootNode: Node;
+
+	static renderingComponent: Component;
 	
 	async onload() {}
 	async onunload() {}
@@ -61,6 +63,7 @@ export class Component {
 	}
 	
 	update() {
+		Component.renderingComponent = this;
 		const element = this.render();
 		
 		this.rootNode.parentNode.replaceChild(
@@ -71,6 +74,10 @@ export class Component {
 		this.rootNode = element;
 		
 		return element;
+	}
+
+	static createElement(tag, attributes, ...contents) {
+		return Component.renderingComponent.createElement(tag, attributes, ...contents);
 	}
 	
 	createElement(tag, attributes, ...contents) {
@@ -100,17 +107,23 @@ export class Component {
 				this.addToElement(child, element);
 			}
 		} else if (item instanceof Component) {
+			Component.renderingComponent = item;
+
 			const component = item.render();
 			component.hostingComponent.parent = this;
 			component.hostingComponent.rootNode = component;
 
 			element.appendChild(item.render());
+
+			Component.renderingComponent = this;
 		} else if (item !== false) {
 			element.appendChild(document.createTextNode(item));
 		}
 	}
 
 	host(parent: HTMLElement) {
+		Component.renderingComponent = this;
+
 		const root = this.render();
 		this.rootNode = root;
 		this.parent = null;

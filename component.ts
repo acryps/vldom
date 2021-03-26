@@ -123,7 +123,9 @@ export class Component {
 		}
 	}
 
-	host(parent: HTMLElement) {
+	async host(parent: HTMLElement) {
+		await this.onload();
+
 		Component.renderingComponent = this;
 
 		const root = this.render();

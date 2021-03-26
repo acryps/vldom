@@ -97,6 +97,8 @@ export class Component {
 				element.setAttribute(key, value);
 			}
 		}
+
+		return element;
 	}
 
 	private addToElement(item, element) {

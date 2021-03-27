@@ -1,7 +1,7 @@
 import { Component } from "./component";
 
 type RouteGroup = Component | {
-	component: Component,
+	component: typeof Component,
 	children?: {
 		[key: string]: RouteGroup
 	}
@@ -10,7 +10,8 @@ type RouteGroup = Component | {
 export class ConstructedRoute {
 	path: RegExp;
 	openStartPath: RegExp;
-	component: Component;
+	component: typeof Component;
+	renderedComponent?: Component;
 	parent: ConstructedRoute;
 	parents: ConstructedRoute[];
 	params: string[];
@@ -135,18 +136,24 @@ export class Router {
 		const lastCommonRoute = updatedRoute.parents[matchingRoutePath.length - 1];
 
 		if (lastCommonRoute) {
-			lastCommonRoute.component.update(updatedSubRoutes[0].component);
+			const component = new updatedSubRoutes[0].component;
+			updatedSubRoutes[0].renderedComponent = component;
+
+			lastCommonRoute.renderedComponent.update(component);
 		} else {
 			while (this.rootNode.hasChildNodes()) {
 				this.rootNode.removeChild(this.rootNode.firstChild);
 			}
+
+			const component = new updatedSubRoutes[0].component;
+			updatedSubRoutes[0].renderedComponent = component;
 			
-			Component.renderingComponent = updatedSubRoutes[0].component;
-			this.rootNode.appendChild(updatedSubRoutes[0].component.render());
+			Component.renderingComponent = component;
+			this.rootNode.appendChild(component.render());
 		}
 
 		for (let route of matchingRoutePath) {
-			await route.component.onchildparamchange(updatedParams, updatedRoute.clientRoute, updatedRoute.component);
+			await route.renderedComponent.onchildparamchange(updatedParams, updatedRoute.clientRoute, updatedRoute.renderedComponent);
 		}
 
 		this.renderedPath = path;
@@ -182,7 +189,7 @@ export class Router {
 			const constructedRoute = {
 				path: new RegExp(`^${matchExpression}$`),
 				openStartPath: new RegExp(`${matchExpression}$`),
-				component: route instanceof Component ? route : route.component,
+				component: typeof route == "function" ? route : (route as any).component,
 				parent: parent,
 				params: path.match(/:[a-zA-Z0-9]+/g),
 				parents: [],
@@ -194,8 +201,8 @@ export class Router {
 
 			this.constructedRoutes.push(constructedRoute);
 
-			if (!(route instanceof Component) && route.children) {
-				this.constructRoutes(`${root}${path}`, route.children, constructedRoute);
+			if (!(typeof route == "function") && (route as any).children) {
+				this.constructRoutes(`${root}${path}`, (route as any).children, constructedRoute);
 			}
 		}
 

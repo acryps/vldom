@@ -1,6 +1,6 @@
 import { Component } from "./component";
 
-type RouteGroup = Component | {
+type RouteGroup = typeof Component | {
 	component: typeof Component,
 	children?: {
 		[key: string]: RouteGroup
@@ -77,7 +77,7 @@ export class Router {
 	static routes: {
 		[ key: string ]: RouteGroup;
 
-		default?: Component
+		default?: typeof Component
 	} = {};
 
 	get activePath() {

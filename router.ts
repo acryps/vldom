@@ -191,7 +191,7 @@ export class Router {
 				openStartPath: new RegExp(`${matchExpression}$`),
 				component: typeof route == "function" ? route : (route as any).component,
 				parent: parent,
-				params: path.match(/:[a-zA-Z0-9]+/g),
+				params: path.match(/:[a-zA-Z0-9]+/g) || [],
 				parents: [],
 				clientRoute: new Route()
 			}

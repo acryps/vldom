@@ -1,4 +1,4 @@
-import { Route } from "./route";
+import { Route } from "./router";
 
 export class Component {
 	static directives: { 
@@ -22,7 +22,7 @@ export class Component {
 	async onparamchange(params) {}
 	async onchildparamchange(params, route: Route, component: Component) {}
 	
-	render(): Node {
+	render(child?: Component): Node {
 		return document.createTextNode(this.constructor.name);
 	}
 	
@@ -62,9 +62,9 @@ export class Component {
 		this.timers.intervals = [];
 	}
 	
-	update() {
+	update(child?: Component) {
 		Component.renderingComponent = this;
-		const element = this.render();
+		const element = this.render(child);
 		
 		this.rootNode.parentNode.replaceChild(
 			this.rootNode,

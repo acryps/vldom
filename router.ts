@@ -186,7 +186,7 @@ export class Router {
 				parent: parent,
 				params: path.match(/:[a-zA-Z0-9]+/g),
 				parents: [],
-				clientRoute: new Route();
+				clientRoute: new Route()
 			}
 
 			constructedRoute.clientRoute.path = path;

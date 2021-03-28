@@ -1,70 +1,8 @@
 import { Component } from "./component";
+import { ConstructedRoute } from "./constructed-route";
+import { RouteGroup } from "./route-group";
+import { Route } from "./route";
 
-type RouteGroup = typeof Component | {
-	component: typeof Component,
-	children?: {
-		[key: string]: RouteGroup
-	}
-}
-
-export class ConstructedRoute {
-	path: RegExp;
-	openStartPath: RegExp;
-	component: typeof Component;
-	renderedComponent?: Component;
-	parent: ConstructedRoute;
-	parents: ConstructedRoute[];
-	params: string[];
-	clientRoute: Route;
-	renderedRoot?: Node;
-}
-
-/*
-
-	ROUTING CONCEPT:
-
-	routes:
-		/a -> AComponent
-			/b/:c -> BComponent
-				/d/:e -> DComponent
-
-	actions:
-		/a -> AComponent
-
-		/a/b/1 -> AComponent{
-			BComponent(1)
-		}
-
-		/a/b/1/d/2 -> AComponent{ 
-			BComponent(1) {
-				DComponent(2)
-			}
-		}
-
-	re-renders:
-		/a -> /a/b/1
-			AComponent: re-render(BComponent)
-			BComponent: render()
-
-		/a/b/1 -> /a/b/2
-			AComponent: no reload, onchildparamchange()
-			BComponent: onparamchange(), no render
-
-		/a/b/1 -> /a/b/1/d/2
-			AComponent: no reload
-			BComponent: render(DComponent)
-			DComponent: render()
-
-		/a/b/1/d/2 -> /a/b/1/d/3
-			AComponent: no reload, onchildparamchange()
-			BComponent: no reload, onchildparamchange()
-			DComponent: onparamchange(), no render
-
-		/a/b/1/d/3 -> /a/b/2
-			AComponent: no reload, onchildparamchange()
-			BComponent: onparamchange(), render()
-
-*/
 export class Router {
 	rootNode: Node;
 
@@ -76,8 +14,6 @@ export class Router {
 
 	static routes: {
 		[ key: string ]: RouteGroup;
-
-		default?: typeof Component
 	} = {};
 
 	get activePath() {
@@ -93,8 +29,7 @@ export class Router {
 			}
 		}
 
-		// return default route (or null)
-		return this.constructedRoutes.find(r => r.path.source == "/^default$/");
+		throw new Error(`invalid route '${path}'`);
 	}
 
 	private getActiveParams(path: string, activeRoute: ConstructedRoute) {
@@ -111,7 +46,7 @@ export class Router {
 				item[route.params[i]] = matches[i];
 			}
 
-			items.push(item);
+			items.unshift(item);
 
 			path = path.replace(route.openStartPath, "");
 			route = route.parent;
@@ -130,35 +65,78 @@ export class Router {
 		const updatedRoute = this.getActiveRoute();
 		const updatedParams = this.getActiveParams(path, updatedRoute);
 
-		const matchingRoutePath = this.getMatchingRoutePath(updatedRoute, updatedParams);
+		const matchingRoutePath = this.renderedRoute ? this.getMatchingRoutePath(updatedRoute, updatedParams) : [];
 
-		const updatedSubRoutes = updatedRoute.parents.slice(matchingRoutePath.length);
-		const lastCommonRoute = updatedRoute.parents[matchingRoutePath.length - 1];
+		const elementLayers: Node[] = [];
 
-		if (lastCommonRoute) {
-			const component = new updatedSubRoutes[0].component;
-			updatedSubRoutes[0].renderedComponent = component;
-
-			lastCommonRoute.renderedComponent.update(component);
-		} else {
-			while (this.rootNode.hasChildNodes()) {
-				this.rootNode.removeChild(this.rootNode.firstChild);
-			}
-
-			const component = new updatedSubRoutes[0].component;
-			updatedSubRoutes[0].renderedComponent = component;
-			
-			Component.renderingComponent = component;
-			this.rootNode.appendChild(component.render());
+		for (let l = 0; l < updatedRoute.parents.length; l++) {
+			elementLayers.push(document.createComment(updatedRoute.parents[l].component.name));
 		}
 
-		for (let route of matchingRoutePath) {
-			await route.renderedComponent.onchildparamchange(updatedParams, updatedRoute.clientRoute, updatedRoute.renderedComponent);
+		// for (let l = updatedRoute.parents.length - 1; l >= 0; l--) {
+		for (let l = 0; l < updatedRoute.parents.length; l++) {
+			const layer = updatedRoute.parents[l];
+			const params = updatedParams[l];
+
+			console.group("layer", l, layer.component.name, params);
+
+			if (this.renderedRoute && l == matchingRoutePath.length && layer == this.renderedRoute.parents[l]) {
+				layer.renderedComponent.params = params;
+				
+				layer.renderedComponent.onchange(params).then(() => {
+					layer.renderedComponent.update(layer.renderedChildNode);
+				});
+			} else if (l < matchingRoutePath.length) {
+				const nextLayer = updatedRoute.parents[l + 1];
+
+				layer.renderedComponent.params = params;
+
+				if (this.renderedRoute && nextLayer && layer == this.renderedRoute.parents[l] && nextLayer != this.renderedRoute.parents[l + 1]) {
+					await layer.renderedComponent.onchange(params);
+					layer.renderedComponent.update(elementLayers[l + 1]);
+				} else {
+					layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
+				}
+			} else {
+				const component = new layer.component();
+				component.params = params;
+
+				layer.renderedComponent = component;
+
+				requestAnimationFrame(() => {
+					component.onload().then(() => {
+						Component.renderingComponent = component;
+						const node = component.render(elementLayers[l + 1]);
+	
+						component.rootNode = node;
+	
+						layer.renderedRoot = node;
+	
+						if (updatedRoute.parents[l - 1]) {
+							updatedRoute.parents[l - 1].renderedChildNode = node;
+						}
+
+						if (elementLayers[l].parentNode) {
+							elementLayers[l].parentNode.replaceChild(node, elementLayers[l]);
+						}
+						
+						elementLayers[l] = node;
+					});
+				});
+			}
+
+			console.groupEnd();
+		}
+
+		if (!this.renderedRoute) {
+			this.rootNode.appendChild(elementLayers[0]);
 		}
 
 		this.renderedPath = path;
 		this.renderedRoute = updatedRoute;
 		this.renderedParams = updatedParams;
+
+		console.groupEnd();
 	}
 
 	getMatchingRoutePath(updatedRoute: ConstructedRoute, updatedParams) {
@@ -184,14 +162,13 @@ export class Router {
 	constructRoutes(root, routes = Router.routes, parent: ConstructedRoute = null) {
 		for (let path in routes) {
 			const route = routes[path];
-			const matchExpression = `${root}${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, "(.[^\\/]+)")
 
 			const constructedRoute = {
-				path: new RegExp(`^${matchExpression}$`),
-				openStartPath: new RegExp(`${matchExpression}$`),
+				path: new RegExp(`^${`${root}${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, "(.[^\\/]+)")}$`),
+				openStartPath: new RegExp(`${`${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, "(.[^\\/]+)")}$`),
 				component: typeof route == "function" ? route : (route as any).component,
 				parent: parent,
-				params: path.match(/:[a-zA-Z0-9]+/g) || [],
+				params: (path.match(/:[a-zA-Z0-9]+/g) || []).map(key => key.replace(":", "")),
 				parents: [],
 				clientRoute: new Route()
 			}
@@ -206,13 +183,15 @@ export class Router {
 			}
 		}
 
-		for (let route of this.constructedRoutes) {
-			let item = route;
+		if (routes == Router.routes) {
+			for (let route of this.constructedRoutes) {
+				let item = route;
 
-			while (item) {
-				route.parents.unshift(route);
+				while (item) {
+					route.parents.unshift(item);
 
-				item = item.parent;
+					item = item.parent;
+				}
 			}
 		}
 	}
@@ -223,14 +202,5 @@ export class Router {
 		this.rootNode = root;
 
 		this.update();
-	}
-}
-
-export class Route {
-	path: string;
-	parent?: Route;
-	
-	get fullPath() {
-		return this.parent ? `${this.parent.fullPath}${this.path}` : this.path;
 	}
 }

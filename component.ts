@@ -1,4 +1,4 @@
-import { Route } from "./router";
+import { Route } from "./route";
 
 export class Component {
 	static directives: { 
@@ -19,10 +19,10 @@ export class Component {
 	
 	async onload() {}
 	async onunload() {}
-	async onparamchange(params) {}
-	async onchildparamchange(params, route: Route, component: Component) {}
+	async onchange(params) {}
+	async onchildchange(params, route: Route, component: Component) {}
 	
-	render(child?: Component): Node {
+	render(child?: Node): Node {
 		return document.createTextNode(this.constructor.name);
 	}
 	
@@ -62,14 +62,13 @@ export class Component {
 		this.timers.intervals = [];
 	}
 	
-	update(child?: Component) {
+	update(child?: Node) {
 		Component.renderingComponent = this;
 		const element = this.render(child);
 		
-		this.rootNode.parentNode.replaceChild(
-			this.rootNode,
-			element
-		);
+		if (this.rootNode.parentNode) {
+			this.rootNode.parentNode.replaceChild(element, this.rootNode);
+		}
 		
 		this.rootNode = element;
 		
@@ -118,12 +117,12 @@ export class Component {
 			element.appendChild(item.render());
 
 			Component.renderingComponent = this;
-		} else if (item !== false) {
+		} else if (item !== false && item !== undefined) {
 			element.appendChild(document.createTextNode(item));
 		}
 	}
 
-	async host(parent: HTMLElement) {
+	async host(parent: Node) {
 		await this.onload();
 
 		Component.renderingComponent = this;

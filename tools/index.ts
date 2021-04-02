@@ -1,8 +1,10 @@
+import { DomCompiler } from "./compiler";
+
 const args = process.argv.slice(2);
 
 switch (args[0]) {
 	case "compile":
-		compile();
+		new DomCompiler();
 
 		break;
 

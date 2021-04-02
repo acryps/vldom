@@ -42,6 +42,7 @@ export class DomCompiler {
 				) || node.callee.object?.name == "Component"
 			)) {
                 const attributes = node.arguments[1];
+				const component = source.substring(node.range[0], node.callee.range[1]).replace(".createElement", "");
 
                 replace.push({
                     offset: node.range[0],
@@ -57,7 +58,7 @@ export class DomCompiler {
                             replace.push({
                                 offset: property.value.range[0],
                                 length: property.value.range[1] - property.value.range[0],
-                                content: `Component.accessor(() => ${value}, value => ${value} = value)`
+                                content: `${component}.accessor(() => ${value}, value => ${value} = value)`
                             });
                         }
                     }

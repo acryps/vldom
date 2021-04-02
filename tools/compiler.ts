@@ -42,7 +42,7 @@ export class DomCompiler {
                 replace.push({
                     offset: node.range[0],
                     length: node.callee.range[1] - node.range[0],
-                    content: "this.createElement".toUpperCase()
+                    content: "this.createElement"
                 });
 
                 if (attributes?.type == "ObjectExpression") {

@@ -14,8 +14,6 @@ export class Component {
 	params: any;
 	parent?: Component;
 	rootNode: Node;
-
-	static renderingComponent: Component;
 	
 	async onload() {}
 	async onunload() {}
@@ -63,7 +61,6 @@ export class Component {
 	}
 	
 	update(child?: Node) {
-		Component.renderingComponent = this;
 		const element = this.render(child);
 		
 		if (this.rootNode.parentNode) {
@@ -75,8 +72,9 @@ export class Component {
 		return element;
 	}
 
+	// this method is used as a dummy before compilation with 'vldom compile'
 	static createElement(tag, attributes, ...contents) {
-		return Component.renderingComponent.createElement(tag, attributes, ...contents);
+		throw "cannot create element from uncompiled source";
 	}
 	
 	createElement(tag, attributes, ...contents) {
@@ -108,15 +106,11 @@ export class Component {
 				this.addToElement(child, element);
 			}
 		} else if (item instanceof Component) {
-			Component.renderingComponent = item;
-
 			const component = item.render();
 			component.hostingComponent.parent = this;
 			component.hostingComponent.rootNode = component;
 
 			element.appendChild(item.render());
-
-			Component.renderingComponent = this;
 		} else if (item !== false && item !== undefined) {
 			element.appendChild(document.createTextNode(item));
 		}
@@ -124,8 +118,6 @@ export class Component {
 
 	async host(parent: Node) {
 		await this.onload();
-
-		Component.renderingComponent = this;
 
 		const root = this.render();
 		this.rootNode = root;

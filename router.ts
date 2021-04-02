@@ -163,7 +163,6 @@ export class Router {
 
 				requestAnimationFrame(() => {
 					component.onload().then(() => {
-						Component.renderingComponent = component;
 						const node = component.render(elementLayers[l + 1]);
 	
 						component.rootNode = node;

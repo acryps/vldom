@@ -31,11 +31,47 @@ export class DomCompiler {
 			return;
 		}
 
-		esprima.parseScript(source, {}, (node, meta) => {
-			if (node.type == "CallExpression") {
-				console.log(node.callee);
-			}
-		});
+		const replace = [];
+
+        esprima.parseScript(source, {
+            range: true
+        }, (node, meta) => {
+            if (node.type == "CallExpression" && node.callee.type == "MemberExpression" && node.callee.property?.name == "createElement") {
+                const attributes = node.arguments[1];
+
+                replace.push({
+                    offset: node.range[0],
+                    length: node.callee.range[1] - node.range[0],
+                    content: "this.createElement".toUpperCase()
+                });
+
+                if (attributes?.type == "ObjectExpression") {
+                    for (let property of attributes.properties) {
+                        if (property.key.type == "Literal" && property.key.value[0] == "$") {
+                            const value = source.substring(property.value.range[0], property.value.range[1]);
+
+                            replace.push({
+                                offset: property.value.range[0],
+                                length: property.value.range[1] - property.value.range[0],
+                                content: `{ get() { return ${value} }, set(value) { ${value} = value } }`
+                            });
+                        }
+                    }
+                }
+            }
+        });
+
+        let offset = 0; 
+
+        for (let item of replace.sort((a, b) => a.offset - b.offset)) {
+            const before = source.substring(0, item.offset - offset);
+            const after = source.substring(item.offset - offset + item.length);
+
+            source = `${before}${item.content}${after}`;
+            offset += item.length - item.content.length;
+        }
+        
+        fs.writeFileSync(path, `// @vldom parsed\n${source}`);
 	}
 
 	scan(directory: string) {

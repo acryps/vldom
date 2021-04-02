@@ -20,6 +20,42 @@ export class Router {
 		return location.hash.replace("#", "");
 	}
 
+	set activePath(value: string) {
+		location.hash = `#${value}`;
+	}
+
+	navigate(path: string, relative?: Component) {
+		this.activePath = this.absolute(path, relative);
+
+		this.update();
+	}
+
+	absolute(path: string, relative?: Component) {
+		if (path[0] == "/") {
+			return path;
+		} else if (relative) {
+			return this.resolve(`${relative.activeRoute.fullPath}/${path}`);
+		} else {
+			return this.resolve(`${this.activePath}/${path}`);
+		}
+	}
+
+	resolve(path: string) {
+		const resolved = [];
+
+		for (let component of path.split("/")) {
+			if (component && component != ".") {
+				if (component == "..") {
+					resolved.pop();
+				} else {
+					resolved.push(component);
+				}
+			}
+		}
+
+		return `/${resolved.join("/")}`;
+	}
+
 	private getActiveRoute() {
 		const path = this.activePath;
 
@@ -76,12 +112,21 @@ export class Router {
 		// for (let l = updatedRoute.parents.length - 1; l >= 0; l--) {
 		for (let l = 0; l < updatedRoute.parents.length; l++) {
 			const layer = updatedRoute.parents[l];
+			const parentLayer = updatedRoute.parents[l - 1];
 			const params = updatedParams[l];
 
-			console.group("layer", l, layer.component.name, params);
+			layer.clientRoute.path = layer.clientRoute.matchingPath;
+
+			for (let key in params) {
+				layer.clientRoute.path = layer.clientRoute.path.replace(`:${key}`, params[key]);
+			}
+
+			console.group("layer", l, layer.clientRoute.path, layer.component.name, params);
 
 			if (this.renderedRoute && l == matchingRoutePath.length && layer == this.renderedRoute.parents[l]) {
 				layer.renderedComponent.params = params;
+				layer.renderedComponent.activeRoute = layer.clientRoute;
+				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 				
 				layer.renderedComponent.onchange(params).then(() => {
 					layer.renderedComponent.update(layer.renderedChildNode);
@@ -90,6 +135,8 @@ export class Router {
 				const nextLayer = updatedRoute.parents[l + 1];
 
 				layer.renderedComponent.params = params;
+				layer.renderedComponent.activeRoute = layer.clientRoute;
+				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 
 				if (this.renderedRoute && nextLayer && layer == this.renderedRoute.parents[l] && nextLayer != this.renderedRoute.parents[l + 1]) {
 					await layer.renderedComponent.onchange(params);
@@ -100,6 +147,8 @@ export class Router {
 			} else {
 				const component = new layer.component();
 				component.params = params;
+				component.activeRoute = layer.clientRoute;
+				component.parent = parentLayer?.renderedComponent;
 
 				layer.renderedComponent = component;
 
@@ -173,7 +222,7 @@ export class Router {
 				clientRoute: new Route()
 			}
 
-			constructedRoute.clientRoute.path = path;
+			constructedRoute.clientRoute.matchingPath = path;
 			constructedRoute.clientRoute.parent = parent && parent.clientRoute;
 
 			this.constructedRoutes.push(constructedRoute);

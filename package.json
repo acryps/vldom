@@ -4,6 +4,9 @@
 	"description": "simple component system",
 	"main": "dist/index.js",
 	"typings": "dist/index.d.ts",
+	"bin": {
+		"vldom": "bin/vldom.js"
+	},
 	"scripts": {
 		"preversion": "git pull",
 		"postversion": "git push",
@@ -14,5 +17,9 @@
 	"keywords": [
 		"vldom",
 		"vlui"
-	]
+	],
+	"dependencies": {
+		"@types/node": "^14.14.37",
+		"esprima": "^4.0.1"
+	}
 }

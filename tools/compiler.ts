@@ -33,7 +33,7 @@ export class DomCompiler {
 
 		esprima.parseScript(source, {}, (node, meta) => {
 			if (node.type == "CallExpression") {
-				console.log(source.substring(meta.start.offset, meta.end.offset));
+				console.log(node.callee);
 			}
 		});
 	}

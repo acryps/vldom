@@ -57,7 +57,7 @@ export class DomCompiler {
                             replace.push({
                                 offset: property.value.range[0],
                                 length: property.value.range[1] - property.value.range[0],
-                                content: `{ get() { return ${value} }, set(value) { ${value} = value } }`
+                                content: `Component.accessor(() => ${value}, value => ${value} = value)`
                             });
                         }
                     }

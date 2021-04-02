@@ -98,6 +98,17 @@ export class Component {
 		return element;
 	}
 
+	static accessor(get: Function, set: Function) {
+		return {
+			get() {
+				return get()
+			},
+			set(value) {
+				set(value);
+			}
+		}
+	}
+
 	private addToElement(item, element) {
 		if (item instanceof Node) {
 			element.appendChild(item);

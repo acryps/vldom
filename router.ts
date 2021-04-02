@@ -124,6 +124,8 @@ export class Router {
 			console.group("layer", l, layer.clientRoute.path, layer.component.name, params);
 
 			if (this.renderedRoute && l == matchingRoutePath.length && layer == this.renderedRoute.parents[l]) {
+				console.log("% onchange");
+
 				layer.renderedComponent.params = params;
 				layer.renderedComponent.activeRoute = layer.clientRoute;
 				layer.renderedComponent.parent = parentLayer?.renderedComponent;
@@ -139,9 +141,14 @@ export class Router {
 				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 
 				if (this.renderedRoute && nextLayer && layer == this.renderedRoute.parents[l] && nextLayer != this.renderedRoute.parents[l + 1]) {
-					await layer.renderedComponent.onchange(params);
-					layer.renderedComponent.update(elementLayers[l + 1]);
+					console.log("& onchange");
+
+					layer.renderedComponent.onchange(params).then(() => {
+						layer.renderedComponent.update(elementLayers[l + 1]);
+					});
 				} else {
+					console.log("& onchildchange");
+
 					layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
 				}
 			} else {
@@ -151,6 +158,8 @@ export class Router {
 				component.parent = parentLayer?.renderedComponent;
 
 				layer.renderedComponent = component;
+
+				console.log("+ create");
 
 				requestAnimationFrame(() => {
 					component.onload().then(() => {

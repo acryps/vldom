@@ -5,7 +5,7 @@ export class DomCompiler {
 	static configFile = "tsconfig.json";
 
 	constructor() {
-		if (fs.existsSync(DomCompiler.configFile)) {
+		if (!fs.existsSync(DomCompiler.configFile)) {
 			throw new Error(`no '${DomCompiler.configFile}' found in '${process.cwd()}'`);
 		}
 

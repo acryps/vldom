@@ -36,7 +36,11 @@ export class DomCompiler {
         esprima.parseScript(source, {
             range: true
         }, (node, meta) => {
-            if (node.type == "CallExpression" && node.callee.type == "MemberExpression" && node.callee.property?.name == "createElement" && node.callee.object?.name == "Component") {
+            if (node.type == "CallExpression" && node.callee.type == "MemberExpression" && node.callee.property?.name == "createElement" && (
+				(
+					node.callee.object?.type == "MemberExpression" && node.callee.object?.property?.name == "Component"
+				) || node.callee.object?.name == "Component"
+			)) {
                 const attributes = node.arguments[1];
 
                 replace.push({

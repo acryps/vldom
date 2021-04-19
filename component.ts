@@ -14,6 +14,7 @@ export class Component {
 	params: any;
 	parent?: Component;
 	rootNode: Node;
+	child: Node;
 	
 	async onload() {}
 	async onunload() {}
@@ -61,6 +62,12 @@ export class Component {
 	}
 	
 	update(child?: Node) {
+		if (arguments.length == 0) {
+			child = this.child;
+		} else {
+			this.child = child;
+		}
+
 		const element = this.render(child);
 		
 		if (this.rootNode.parentNode) {
@@ -70,6 +77,11 @@ export class Component {
 		this.rootNode = element;
 		
 		return element;
+	}
+
+	async reload() {
+		await this.onload();
+		await this.update();
 	}
 
 	// this method is used as a dummy before compilation with 'vldom compile'

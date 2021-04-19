@@ -121,17 +121,13 @@ export class Router {
 				layer.clientRoute.path = layer.clientRoute.path.replace(`:${key}`, params[key]);
 			}
 
-			console.group("layer", l, layer.clientRoute.path, layer.component.name, params);
-
 			if (this.renderedRoute && l == matchingRoutePath.length && layer == this.renderedRoute.parents[l]) {
-				console.log("% onchange");
-
 				layer.renderedComponent.params = params;
 				layer.renderedComponent.activeRoute = layer.clientRoute;
 				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 				
 				layer.renderedComponent.onchange(params).then(() => {
-					layer.renderedComponent.update(layer.renderedChildNode);
+					layer.renderedComponent.update(layer.renderedComponent.rootNode);
 				});
 			} else if (l < matchingRoutePath.length) {
 				const nextLayer = updatedRoute.parents[l + 1];
@@ -141,14 +137,10 @@ export class Router {
 				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 
 				if (this.renderedRoute && nextLayer && layer == this.renderedRoute.parents[l] && nextLayer != this.renderedRoute.parents[l + 1]) {
-					console.log("& onchange");
-
 					layer.renderedComponent.onchange(params).then(() => {
 						layer.renderedComponent.update(elementLayers[l + 1]);
 					});
 				} else {
-					console.log("& onchildchange");
-
 					layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
 				}
 			} else {
@@ -159,30 +151,25 @@ export class Router {
 
 				layer.renderedComponent = component;
 
-				console.log("+ create");
-
 				requestAnimationFrame(() => {
 					component.onload().then(() => {
+						component.child = elementLayers[l + 1];
+
 						const node = component.render(elementLayers[l + 1]);
-	
 						component.rootNode = node;
-	
-						layer.renderedRoot = node;
-	
-						if (updatedRoute.parents[l - 1]) {
-							updatedRoute.parents[l - 1].renderedChildNode = node;
-						}
 
 						if (elementLayers[l].parentNode) {
 							elementLayers[l].parentNode.replaceChild(node, elementLayers[l]);
+						}
+
+						if (parentLayer) {
+							parentLayer.renderedComponent.child = node;
 						}
 						
 						elementLayers[l] = node;
 					});
 				});
 			}
-
-			console.groupEnd();
 		}
 
 		if (!this.renderedRoute) {
@@ -192,8 +179,6 @@ export class Router {
 		this.renderedPath = path;
 		this.renderedRoute = updatedRoute;
 		this.renderedParams = updatedParams;
-
-		console.groupEnd();
 	}
 
 	getMatchingRoutePath(updatedRoute: ConstructedRoute, updatedParams) {

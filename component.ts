@@ -77,6 +77,10 @@ export class Component {
 		if (this.rootNode.parentNode) {
 			this.rootNode.parentNode.replaceChild(element, this.rootNode);
 		}
+
+		if (this.parent) {
+			this.parent.child = element;
+		}
 		
 		this.rootNode = element;
 		

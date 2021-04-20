@@ -68,6 +68,10 @@ export class Component {
 			this.child = child;
 		}
 
+		if (child?.parentElement) {
+			child.parentElement.removeChild(child);
+		}
+
 		const element = this.render(child);
 		
 		if (this.rootNode.parentNode) {

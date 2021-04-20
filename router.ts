@@ -127,7 +127,7 @@ export class Router {
 				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 				
 				layer.renderedComponent.onchange(params).then(() => {
-					layer.renderedComponent.update(layer.renderedComponent.rootNode);
+					layer.renderedComponent.update();
 				});
 			} else if (l < matchingRoutePath.length) {
 				const nextLayer = updatedRoute.parents[l + 1];

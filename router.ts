@@ -56,19 +56,21 @@ export class Router {
 		return `/${resolved.join("/")}`;
 	}
 
-	private getActiveRoute() {
-		const path = this.activePath;
-
+	getRoute(path: string) {
 		for (let route of this.constructedRoutes) {
 			if (route.path.test(path)) {
 				return route;
 			}
 		}
 
-		throw new Error(`invalid route '${path}'`);
+		return null;
 	}
 
-	private getActiveParams(path: string, activeRoute: ConstructedRoute) {
+	getActiveRoute() {
+		return this.getRoute(this.activePath);
+	}
+
+	getActiveParams(path: string, activeRoute: ConstructedRoute) {
 		const items: { [key: string]: string }[] = [];
 
 		let route = activeRoute;
@@ -99,6 +101,11 @@ export class Router {
 		}
 
 		const updatedRoute = this.getActiveRoute();
+
+		if (!updatedRoute) {
+			throw new Error(`invalid route '${path}'`);
+		}
+
 		const updatedParams = this.getActiveParams(path, updatedRoute);
 
 		const matchingRoutePath = this.renderedRoute ? this.getMatchingRoutePath(updatedRoute, updatedParams) : [];

@@ -149,7 +149,7 @@ export class Component {
 
 				element.replaceChild(child, placeholder);
 			});
-		} else if (item !== false && item !== undefined) {
+		} else if (item !== false && item !== undefined && item !== null) {
 			element.appendChild(document.createTextNode(item));
 		}
 	}

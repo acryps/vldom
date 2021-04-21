@@ -129,7 +129,7 @@ export class Component {
 		}
 	}
 
-	private addToElement(item, element) {
+	private addToElement(item, element: Node) {
 		if (item instanceof Node) {
 			element.appendChild(item);
 		} else if (Array.isArray(item)) {
@@ -137,11 +137,18 @@ export class Component {
 				this.addToElement(child, element);
 			}
 		} else if (item instanceof Component) {
-			const component = item.render();
-			component.hostingComponent.parent = this;
-			component.hostingComponent.rootNode = component;
+			const placeholder = document.createComment(item.constructor.name);
 
-			element.appendChild(item.render());
+			element.appendChild(placeholder);
+
+			item.parent = this;
+
+			item.onload().then(() => {
+				const child = item.render();
+				item.rootNode = child;
+
+				element.replaceChild(child, placeholder);
+			});
 		} else if (item !== false && item !== undefined) {
 			element.appendChild(document.createTextNode(item));
 		}

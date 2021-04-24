@@ -109,7 +109,7 @@ export class Component {
 			const value = attributes[key];
 			
 			if (key in Component.directives) {
-				Component.directives[key](element, value, tag, attributes, ...contents);
+				Component.directives[key](element, value, tag, attributes, contents.flat());
 			} else {
 				element.setAttribute(key, value);
 			}

@@ -116,7 +116,6 @@ export class Router {
 			elementLayers.push(document.createComment(updatedRoute.parents[l].component.name));
 		}
 
-		// for (let l = updatedRoute.parents.length - 1; l >= 0; l--) {
 		for (let l = 0; l < updatedRoute.parents.length; l++) {
 			const layer = updatedRoute.parents[l];
 			const parentLayer = updatedRoute.parents[l - 1];
@@ -146,6 +145,12 @@ export class Router {
 				if (this.renderedRoute && nextLayer && layer == this.renderedRoute.parents[l] && nextLayer != this.renderedRoute.parents[l + 1]) {
 					layer.renderedComponent.onchange(params).then(() => {
 						layer.renderedComponent.update(elementLayers[l + 1]);
+					});
+				} else if (!nextLayer) {
+					layer.renderedComponent.child = null;
+
+					layer.renderedComponent.onchange(params).then(() => {
+						layer.renderedComponent.update(null);
 					});
 				} else {
 					layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);

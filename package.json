@@ -1,6 +1,6 @@
 {
 	"name": "vldom",
-	"version": "2.3.3",
+	"version": "2.4.0",
 	"description": "simple component system",
 	"main": "dist/index.js",
 	"typings": "dist/index.d.ts",

@@ -4,6 +4,8 @@ import { RouteGroup } from "./route-group";
 import { Route } from "./route";
 
 export class Router {
+	static global: Router;
+
 	rootNode: Node;
 
 	private renderedPath: string;
@@ -251,8 +253,9 @@ export class Router {
 	}
 
 	host(root: Node) {
+		Router.global = this;
+		
 		this.constructRoutes("");
-
 		this.rootNode = root;
 
 		this.update();

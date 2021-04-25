@@ -1,4 +1,5 @@
 import { Route } from "./route";
+import { Router } from "./router";
 
 export class Component {
 	static directives: { 
@@ -162,5 +163,13 @@ export class Component {
 		this.parent = null;
 
 		parent.appendChild(root);
+	}
+
+	navigate(path: string) {
+		Router.global.navigate(path, this);
+	}
+
+	remove() {
+		this.rootNode?.parentElement?.removeChild(this.rootNode);
 	}
 }

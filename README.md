@@ -56,7 +56,7 @@ export class ExampleRecursiveComponent extends Component {
 new ExampleRecursiveComponent(10).host(document.body);
 ```
 
-## Router
+## Router
 vldom has a built-in router
 ```
 Router.root = PageComponent;

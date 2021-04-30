@@ -51,7 +51,44 @@ export class ExampleRecursiveComponent extends Component {
 new ExampleRecursiveComponent(10).host(document.body);
 ```
 
-## Directives
+## Router
+vldom has a built-in router
+```
+Router.root = PageComponent;
+Router.routes = {
+	"/a": AComponent,
+	"/b": BComponent
+};
+
+class PageComponent extends Component {
+	render(child) {
+		return <main>
+			<nav>App</nav>
+
+			{child}
+		</main>;
+	}
+}
+
+class AComponent extends Component {
+	render() {
+		return <p>A!</p>;
+	}
+}
+
+class BComponent extends Component {
+	render() {
+		return <p>B!</p>;
+	}
+}
+
+const router = new Router();
+router.host(document.body);
+
+onhashchange = () => router.update();
+```
+
+## Directives
 You can create custom directives (attribute handlers).
 
 ```

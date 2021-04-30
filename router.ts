@@ -14,6 +14,7 @@ export class Router {
 
 	private constructedRoutes: ConstructedRoute[] = [];
 
+	static root: typeof Component;
 	static routes: {
 		[ key: string ]: RouteGroup;
 	} = {};
@@ -254,6 +255,13 @@ export class Router {
 
 	host(root: Node) {
 		Router.global = this;
+
+		Router.routes = {
+			"": {
+				component: Router.root,
+				children: Router.routes
+			}
+		};
 		
 		this.constructRoutes("");
 		this.rootNode = root;

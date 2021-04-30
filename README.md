@@ -1,4 +1,4 @@
-# VLDOM
+# vldom
 Simple component system with integrated routing
 
 ## Setup
@@ -11,6 +11,11 @@ You'll need to enable jsx in your tsconfig
 		....
 	}
 }</pre>
+
+Compile your client with `tsc` and `vldom compile`!
+```
+tsc && vldom compile
+```
 
 ## Usage
 Create a component by extending the component class

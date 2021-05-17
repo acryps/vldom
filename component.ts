@@ -172,4 +172,15 @@ export class Component {
 	remove() {
 		this.rootNode?.parentElement?.removeChild(this.rootNode);
 	}
+
+	static updating(handler: (index?: number) => string | number, interval) {
+		const element = document.createTextNode(`${handler(0)}`);
+		let i = 0;
+
+		setInterval(() => {
+			element.textContent = `${handler(++i)}`;
+		}, interval);
+
+		return element;
+	}
 }

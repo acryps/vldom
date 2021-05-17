@@ -116,7 +116,7 @@ export class Router {
 		const elementLayers: Node[] = [];
 
 		for (let l = 0; l < updatedRoute.parents.length; l++) {
-			elementLayers.push(document.createComment(updatedRoute.parents[l].component.name));
+			elementLayers.push(document.createComment(`layer ${l}`));
 		}
 
 		for (let l = 0; l < updatedRoute.parents.length; l++) {

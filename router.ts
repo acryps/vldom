@@ -14,11 +14,12 @@ export class Router {
 
 	private constructedRoutes: ConstructedRoute[] = [];
 
-	static routes: {
-		[ key: string ]: RouteGroup;
-	} = {};
-
-	constructor(private root: typeof Component) {}
+	constructor(
+		private root: typeof Component, 
+		private routes: {
+			[ key: string ]: RouteGroup;
+		}
+	) {}
 
 	get activePath() {
 		return location.hash.replace("#", "");
@@ -217,7 +218,7 @@ export class Router {
 		return unchangedRoutes;
 	}
 
-	constructRoutes(root, routes = Router.routes, parent: ConstructedRoute = null) {
+	constructRoutes(root, routes = this.routes, parent: ConstructedRoute = null) {
 		for (let path in routes) {
 			const route = routes[path];
 
@@ -241,7 +242,7 @@ export class Router {
 			}
 		}
 
-		if (routes == Router.routes) {
+		if (routes == this.routes) {
 			for (let route of this.constructedRoutes) {
 				let item = route;
 
@@ -257,10 +258,10 @@ export class Router {
 	host(root: Node) {
 		Router.global = this;
 
-		Router.routes = {
+		this.routes = {
 			"": {
 				component: this.root,
-				children: Router.routes
+				children: this.routes
 			}
 		};
 		

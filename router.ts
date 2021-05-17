@@ -14,10 +14,11 @@ export class Router {
 
 	private constructedRoutes: ConstructedRoute[] = [];
 
-	static root: typeof Component;
 	static routes: {
 		[ key: string ]: RouteGroup;
 	} = {};
+
+	constructor(private root: typeof Component) {}
 
 	get activePath() {
 		return location.hash.replace("#", "");
@@ -258,7 +259,7 @@ export class Router {
 
 		Router.routes = {
 			"": {
-				component: Router.root,
+				component: this.root,
 				children: Router.routes
 			}
 		};

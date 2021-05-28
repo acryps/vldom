@@ -1,4 +1,6 @@
 # vldom
+[![npm version](https://badge.fury.io/js/vldom.svg)](https://badge.fury.io/js/vldom)
+
 Simple component system with integrated routing
 
 ## Setup

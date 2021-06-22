@@ -9,6 +9,7 @@ export class ConstructedRoute {
 	parents: ConstructedRoute[];
 	params: string[];
 	clientRoute: Route;
+	loader: Promise<any>;
 
 	renderedComponent?: Component;
 }

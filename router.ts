@@ -168,8 +168,12 @@ export class Router {
 
 				layer.renderedComponent = component;
 
-				requestAnimationFrame(() => {
-					component.onload().then(() => {
+				requestAnimationFrame(async () => {
+					await parentLayer.loader;
+
+					layer.loader = component.onload();
+
+					layer.loader.then(() => {
 						component.child = elementLayers[l + 1];
 
 						const node = component.render(elementLayers[l + 1]);

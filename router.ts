@@ -169,7 +169,7 @@ export class Router {
 				layer.renderedComponent = component;
 
 				requestAnimationFrame(async () => {
-					await parentLayer.loader;
+					await parentLayer?.loader;
 
 					layer.loader = component.onload();
 

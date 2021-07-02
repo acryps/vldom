@@ -152,6 +152,7 @@ export class Router {
 						layer.renderedComponent.update(elementLayers[l + 1]);
 					});
 				} else if (!nextLayer) {
+					layer.renderedComponent.childNode = null;
 					layer.renderedComponent.child = null;
 
 					layer.renderedComponent.onchange(params).then(() => {
@@ -174,7 +175,7 @@ export class Router {
 					layer.loader = component.onload();
 
 					layer.loader.then(() => {
-						component.child = elementLayers[l + 1];
+						component.childNode = elementLayers[l + 1];
 
 						const node = component.render(elementLayers[l + 1]);
 						component.rootNode = node;
@@ -184,7 +185,8 @@ export class Router {
 						}
 
 						if (parentLayer) {
-							parentLayer.renderedComponent.child = node;
+							parentLayer.renderedComponent.child = component;
+							parentLayer.renderedComponent.childNode = node;
 						}
 						
 						elementLayers[l] = node;

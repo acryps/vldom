@@ -15,7 +15,9 @@ export class Component {
 	params: any;
 	parent?: Component;
 	rootNode: Node;
-	child: Node;
+
+	child?: Component;
+	childNode: Node;
 	
 	async onload() {}
 	async onunload() {}
@@ -64,9 +66,9 @@ export class Component {
 	
 	update(child?: Node) {
 		if (arguments.length == 0) {
-			child = this.child;
+			child = this.childNode;
 		} else {
-			this.child = child;
+			this.childNode = child;
 		}
 
 		if (child?.parentElement) {
@@ -80,7 +82,7 @@ export class Component {
 		}
 
 		if (this.parent) {
-			this.parent.child = element;
+			this.parent.childNode = element;
 		}
 		
 		this.rootNode = element;
@@ -90,6 +92,11 @@ export class Component {
 
 	async reload() {
 		await this.onload();
+
+		if (this.child) {
+			await this.child.reload();
+		}
+
 		await this.update();
 	}
 

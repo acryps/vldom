@@ -23,6 +23,10 @@ export class Component {
 	async onunload() {}
 	async onchange(params) {}
 	async onchildchange(params, route: Route, component: Component) {}
+
+	static renderLoader() {
+		return document.createComment(`* ${this.constructor.name} *`);
+	}
 	
 	render(child?: Node): Node {
 		return document.createTextNode(this.constructor.name);

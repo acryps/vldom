@@ -118,9 +118,16 @@ export class Router {
 		const elementLayers: Node[] = [];
 
 		for (let l = 0; l < updatedRoute.parents.length; l++) {
-			const component = updatedRoute.parents[l].component;
+			const layer = updatedRoute.parents[l];
 
-			elementLayers.push(component.renderLoader());
+			if (!updatedRoute.parents[l].renderedComponent) {
+				layer.renderedComponent = new layer.component();
+				layer.renderedComponent.params = updatedParams[l];
+				layer.renderedComponent.activeRoute = layer.clientRoute;
+				layer.renderedComponent.parent = updatedRoute.parents[l - 1]?.renderedComponent;
+			}
+
+			elementLayers.push(layer.renderedComponent.renderLoader());
 		}
 
 		for (let l = 0; l < updatedRoute.parents.length; l++) {
@@ -164,30 +171,28 @@ export class Router {
 					layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
 				}
 			} else {
-				const component = new layer.component();
-				component.params = params;
-				component.activeRoute = layer.clientRoute;
-				component.parent = parentLayer?.renderedComponent;
-
-				layer.renderedComponent = component;
+				layer.renderedComponent = new layer.component();
+				layer.renderedComponent.params = params;
+				layer.renderedComponent.activeRoute = layer.clientRoute;
+				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 
 				requestAnimationFrame(async () => {
 					await parentLayer?.loader;
 
-					layer.loader = component.onload();
+					layer.loader = layer.renderedComponent.onload();
 
 					layer.loader.then(() => {
-						component.childNode = elementLayers[l + 1];
+						layer.renderedComponent.childNode = elementLayers[l + 1];
 
-						const node = component.render(elementLayers[l + 1]);
-						component.rootNode = node;
+						const node = layer.renderedComponent.render(elementLayers[l + 1]);
+						layer.renderedComponent.rootNode = node;
 
 						if (elementLayers[l].parentNode) {
 							elementLayers[l].parentNode.replaceChild(node, elementLayers[l]);
 						}
 
 						if (parentLayer) {
-							parentLayer.renderedComponent.child = component;
+							parentLayer.renderedComponent.child = layer.renderedComponent;
 							parentLayer.renderedComponent.childNode = node;
 						}
 						

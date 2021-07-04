@@ -24,7 +24,7 @@ export class Component {
 	async onchange(params) {}
 	async onchildchange(params, route: Route, component: Component) {}
 
-	static renderLoader() {
+	renderLoader() {
 		return document.createComment(`* ${this.constructor.name} *`);
 	}
 	

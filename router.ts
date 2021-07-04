@@ -201,6 +201,21 @@ export class Router {
 						}
 						
 						elementLayers[l] = node;
+					}).catch(error => {
+						layer.renderedComponent.childNode = elementLayers[l + 1];
+
+						const node = layer.renderedComponent.renderError(error);
+						layer.renderedComponent.rootNode = node;
+
+						if (elementLayers[l].parentNode) {
+							elementLayers[l].parentNode.replaceChild(node, elementLayers[l]);
+						}
+
+						if (parentLayer) {
+							parentLayer.renderedComponent.childNode = node;
+						}
+						
+						elementLayers[l] = node;
 					});
 				});
 			}

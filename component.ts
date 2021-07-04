@@ -27,6 +27,13 @@ export class Component {
 	renderLoader() {
 		return document.createComment(`* ${this.constructor.name} *`);
 	}
+
+	renderError(error: Error) {
+		return this.createElement("section", null, 
+			this.createElement("b", null, error.message),
+			this.createElement("pre", null, error.stack)
+		);
+	}
 	
 	render(child?: Node): Node {
 		return document.createTextNode(this.constructor.name);

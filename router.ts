@@ -176,6 +176,11 @@ export class Router {
 				layer.renderedComponent.activeRoute = layer.clientRoute;
 				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 
+				if (parentLayer) {
+					parentLayer.renderedComponent.child = layer.renderedComponent;
+					parentLayer.renderedComponent.childNode = elementLayers[l];
+				}
+
 				requestAnimationFrame(async () => {
 					await parentLayer?.loader;
 
@@ -192,7 +197,6 @@ export class Router {
 						}
 
 						if (parentLayer) {
-							parentLayer.renderedComponent.child = layer.renderedComponent;
 							parentLayer.renderedComponent.childNode = node;
 						}
 						

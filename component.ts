@@ -29,6 +29,8 @@ export class Component {
 	}
 
 	renderError(error: Error) {
+		console.error(error);
+		
 		return this.createElement("section", null, 
 			this.createElement("b", null, error.message),
 			this.createElement("pre", null, error.stack)

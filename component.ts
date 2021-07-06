@@ -165,7 +165,7 @@ export class Component {
 			item.parent = this;
 
 			(async () => {
-				item.onload();
+				await item.onload();
 
 				const child = item.render();
 				item.rootNode = child;

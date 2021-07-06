@@ -19,7 +19,7 @@ export class Component {
 	child?: Component;
 	childNode: Node;
 	
-	async onload() {}
+	onload(): Promise<void> | void {}
 	async onunload() {}
 	async onchange(params) {}
 	async onchildchange(params, route: Route, component: Component) {}
@@ -158,18 +158,20 @@ export class Component {
 				this.addToElement(child, element);
 			}
 		} else if (item instanceof Component) {
-			const placeholder = document.createComment(item.constructor.name);
+			const placeholder = item.renderLoader();
 
 			element.appendChild(placeholder);
 
 			item.parent = this;
 
-			item.onload().then(() => {
+			(async () => {
+				item.onload();
+
 				const child = item.render();
 				item.rootNode = child;
 
 				element.replaceChild(child, placeholder);
-			});
+			})();
 		} else if (item !== false && item !== undefined && item !== null) {
 			element.appendChild(document.createTextNode(item));
 		}

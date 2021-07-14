@@ -131,7 +131,7 @@ export class Component {
 			
 			if (key in Component.directives) {
 				Component.directives[key](element, value, tag, attributes, contents);
-			} else {
+			} else if (value !== null) {
 				element.setAttribute(key, value);
 			}
 		}

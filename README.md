@@ -1,4 +1,4 @@
-[[![npm version](http://badge.acryps.com/npm/vldom)](http://badge.acryps.com/go/npm/vldom)
+[![npm version](http://badge.acryps.com/npm/vldom)](http://badge.acryps.com/go/npm/vldom)
 
 <img src="logo.svg" height="50">
 

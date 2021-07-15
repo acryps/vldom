@@ -1,7 +1,10 @@
-# vldom
-[![npm version](https://badge.fury.io/js/vldom.svg)](https://badge.fury.io/js/vldom)
+[[![npm version](http://badge.acryps.com/npm/vldom)](http://badge.acryps.com/go/npm/vldom)
 
-Simple component system with integrated routing
+<img src="logo.svg" height="50">
+
+# vldom TypeScript Frontend Component System
+
+Simple component system with integrated routing.
 
 ## Setup
 You'll need to enable jsx in your tsconfig
@@ -61,11 +64,10 @@ new ExampleRecursiveComponent(10).host(document.body);
 ## Router
 vldom has a built-in router
 ```
-Router.root = PageComponent;
-Router.routes = {
+const router = new Router(PageComponent, {
 	"/a": AComponent,
 	"/b": BComponent
-};
+});
 
 class PageComponent extends Component {
 	render(child) {
@@ -89,7 +91,6 @@ class BComponent extends Component {
 	}
 }
 
-const router = new Router();
 router.host(document.body);
 
 onhashchange = () => router.update();
@@ -99,7 +100,7 @@ onhashchange = () => router.update();
 You can create custom directives (attribute handlers).
 
 ```
-Component.directives["epic-link"] = (element, value) => {
+Component.directives["epic-link"] = (element, value, tag, attributes, content) => {
 	element.onclick = () => {
 		location.href = value;
 	}

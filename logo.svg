@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="200px" height="28px" viewBox="0 0 200 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="144px" height="24px" viewBox="0 0 144 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>Artboard</title>
     <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M80,-6.39488462e-14 L80,24 L71.999,24 L71.999,28.0128557 L63.999,28.0128557 L63.999,24 L56,24 L56,-6.39488462e-14 L80,-6.39488462e-14 Z M72,8 L64,8 L64,15.999 L71.999,15.999 L72,8 Z" id="Shape" fill="#B5B5B5"></path>
-        <polygon id="Path" fill="#B5B5B5" transform="translate(100.000000, 12.000000) rotate(-90.000000) translate(-100.000000, -12.000000) " points="88 24 88 2.27373675e-13 112 2.27373675e-13 112 8 96 8 96 16 112 16 112 24"></polygon>
-        <polygon id="Path" fill="#B5B5B5" points="144 24 120 24 120 0 144 0 144 7.40799622 128 7.40799622 128 8.40799622 144 8.40799622 144 15.6014661 128 15.6014661 128 16.6014661 144 16.6014661"></polygon>
-        <polygon id="Path" fill="#B5B5B5" points="168 0 168 8 160 8 160 24 152 24 152 0"></polygon>
         <polygon id="Path" fill="#30838D" transform="translate(12.000000, 12.000000) scale(1, -1) rotate(-270.000000) translate(-12.000000, -12.000000) " points="-4.02987404e-12 12.6317297 -4.02987404e-12 1.0658141e-12 24 1.0658141e-12 24 8 9.04434941 8 24 16 24 24"></polygon>
         <polygon id="Path" fill="#30838D" transform="translate(40.000000, 12.000000) scale(1, -1) translate(-40.000000, -12.000000) " points="48 0 48 8 40 8 40 24 32 24 32 0"></polygon>
-        <polygon id="Path" fill="#B5B5B5" points="200 24 192 24 192 16 176 16 176 0 184 0 184 8 192 8 192 0 200 0"></polygon>
+        <polygon id="Path" fill="#B5B5B5" transform="translate(68.000000, 12.000000) scale(-1, -1) translate(-68.000000, -12.000000) " points="64 24 56 24 56 0 80 0 80 16 64 16"></polygon>
+        <path d="M88,0 L112,0 L112,24 L88,24 L88,0 Z M96,8 L96,15.999 L103.999,15.999 L104,8 L96,8 Z" id="Shape" fill="#B5B5B5"></path>
+        <polygon id="Rectangle" fill="#B5B5B5" points="120 0 132 12 144 0 144 24 120 24"></polygon>
     </g>
 </svg>

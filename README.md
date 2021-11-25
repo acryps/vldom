@@ -6,6 +6,9 @@
 
 Simple component system with integrated routing.
 
+> Breaking Change in 6.0.0: `onchange` has been renamed `onparameterchange` and `reload` will be automatically called when `onparameterchange`. `onchildchange` has been renamed to `onchildparameterchange` accordingly.
+> To prevent the `reload`-call, implement a custom `onparameterchange`.
+
 ## Setup
 You'll need to enable jsx in your tsconfig
 <pre>{

@@ -20,9 +20,14 @@ export class Component {
 	childNode: Node;
 	
 	onload(): Promise<void> | void {}
+
 	async onunload() {}
-	async onchange(params) {}
-	async onchildchange(params, route: Route, component: Component) {}
+
+	async onparameterchange(params) {
+		this.reload();
+	}
+
+	async onchildparameterchange(params, route: Route, component: Component) {}
 
 	renderLoader() {
 		return document.createComment(`* ${this.constructor.name} *`);

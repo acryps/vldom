@@ -146,7 +146,7 @@ export class Router {
 				layer.renderedComponent.activeRoute = layer.clientRoute;
 				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 
-				layer.renderedComponent.onchange(params).then(() => {
+				layer.renderedComponent.onparameterchange(params).then(() => {
 					layer.renderedComponent.update(elementLayers[l + 1]);
 				});
 			} else if (l < matchingRoutePath.length) {
@@ -157,18 +157,18 @@ export class Router {
 				layer.renderedComponent.parent = parentLayer?.renderedComponent;
 
 				if (this.renderedRoute && nextLayer && layer == this.renderedRoute.parents[l] && nextLayer != this.renderedRoute.parents[l + 1]) {
-					layer.renderedComponent.onchange(params).then(() => {
+					layer.renderedComponent.onparameterchange(params).then(() => {
 						layer.renderedComponent.update(elementLayers[l + 1]);
 					});
 				} else if (!nextLayer) {
 					layer.renderedComponent.childNode = null;
 					layer.renderedComponent.child = null;
 
-					layer.renderedComponent.onchange(params).then(() => {
+					layer.renderedComponent.onparameterchange(params).then(() => {
 						layer.renderedComponent.update(null);
 					});
 				} else {
-					layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
+					layer.renderedComponent.onchildparameterchange(params, layer.clientRoute, layer.renderedComponent);
 				}
 			} else {
 				layer.renderedComponent = new layer.component();

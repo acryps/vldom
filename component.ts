@@ -219,7 +219,7 @@ export class Component {
 				[path]: component
 			},
 
-			route(path: string, component: RouteGroup) {
+			route(path: string, component: RouteGroup): RouteableRouteGroup {
 				tree.children[path] = component;
 
 				return tree;

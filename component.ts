@@ -1,6 +1,6 @@
 import { Route } from "./route";
 import { Router } from "./router";
-import { RouteGroup } from "./route-group";
+import { RouteableRouteGroup, RouteGroup } from "./route-group";
 
 export class Component {
 	static directives: { 
@@ -211,9 +211,9 @@ export class Component {
 
 		return element;
 	}
-	
+
 	static route(path: string, component: RouteGroup) {
-		const tree = {
+		const tree: RouteableRouteGroup = {
 			component: this,
 			children: {
 				[path]: component
@@ -221,9 +221,11 @@ export class Component {
 
 			route(path: string, component: RouteGroup) {
 				tree.children[path] = component;
+
+				return tree;
 			}
 		}
 
-		return tree as RouteGroup;
+		return tree;
 	}
 }

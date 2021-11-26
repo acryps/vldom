@@ -1,6 +1,6 @@
 import { Component } from "./component";
 import { ConstructedRoute } from "./constructed-route";
-import { RouteGroup } from "./route-group";
+import { RouteableRouteGroup, RouteGroup } from "./route-group";
 import { Route } from "./route";
 
 export class Router {
@@ -18,7 +18,7 @@ export class Router {
 	private routes;
 
 	constructor(
-		root: RouteGroup | typeof Component, 
+		root: RouteableRouteGroup | typeof Component, 
 		routes?: {
 			[ key: string ]: RouteGroup;
 		}

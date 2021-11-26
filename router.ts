@@ -14,12 +14,27 @@ export class Router {
 
 	private constructedRoutes: ConstructedRoute[] = [];
 
+	private root;
+	private routes;
+
 	constructor(
-		private root: typeof Component, 
-		private routes: {
+		root: RouteGroup, 
+		routes: {
 			[ key: string ]: RouteGroup;
 		}
-	) {}
+	) {
+		if (routes) {
+			this.root = root;
+			this.routes = routes;
+		} else {
+			if (typeof root == "function") {
+				this.root = root; 
+			} else {
+				this.root = root.component;
+				this.routes = root.children;
+			}
+		}
+	}
 
 	get activePath() {
 		return location.hash.replace("#", "");

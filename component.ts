@@ -1,5 +1,6 @@
 import { Route } from "./route";
 import { Router } from "./router";
+import { RouteGroup } from "./route-group";
 
 export class Component {
 	static directives: { 
@@ -209,5 +210,20 @@ export class Component {
 		}, interval);
 
 		return element;
+	}
+	
+	static route(path: string, component: RouteGroup) {
+		const tree = {
+			component: this,
+			children: {
+				[path]: component
+			},
+
+			route(path: string, component: RouteGroup) {
+				tree.children[path] = component;
+			}
+		}
+
+		return tree as RouteGroup;
 	}
 }

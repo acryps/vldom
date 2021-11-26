@@ -18,8 +18,8 @@ export class Router {
 	private routes;
 
 	constructor(
-		root: RouteGroup, 
-		routes: {
+		root: RouteGroup | typeof Component, 
+		routes?: {
 			[ key: string ]: RouteGroup;
 		}
 	) {

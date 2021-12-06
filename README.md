@@ -67,10 +67,12 @@ new ExampleRecursiveComponent(10).host(document.body);
 ## Router
 vldom has a built-in router
 ```
-const router = new Router(PageComponent, {
-	"/a": AComponent,
-	"/b": BComponent
-});
+const router = new Router(PageComponent
+	.route("/home", HomeComponent),
+	.route("/books", BooksComponent
+		.route("/:id", BookComponent)
+	)
+);
 
 class PageComponent extends Component {
 	render(child) {
@@ -82,15 +84,27 @@ class PageComponent extends Component {
 	}
 }
 
-class AComponent extends Component {
+class HomeComponent extends Component {
 	render() {
-		return <p>A!</p>;
+		return <p>Welcome to my Book Store</p>;
 	}
 }
 
-class BComponent extends Component {
+class BooksComponent extends Component {
 	render() {
-		return <p>B!</p>;
+		return <section>
+			<h1>Books!</h1>
+
+			<button ui-href="someid">Some Book!</button>
+		</section>;
+	}
+}
+
+class BookComponent extends Component {
+	params: { id: string }
+
+	render() {
+		return <p>Book with id {this.params.id}</p>;
 	}
 }
 

@@ -96,7 +96,7 @@ export class Component {
 
 		const element = this.render(child);
 		
-		if (this.rootNode.parentNode) {
+		if (this.rootNode?.parentNode) {
 			this.rootNode.parentNode.replaceChild(element, this.rootNode);
 		}
 

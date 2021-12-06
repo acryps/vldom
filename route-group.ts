@@ -14,5 +14,5 @@ export type RouteableRouteGroup = {
 		[key: string]: RouteGroup;
 	};
 
-	route(route: string, component: typeof Component);
+	route(route: string, component: typeof Component | RouteableRouteGroup);
 }

@@ -197,8 +197,6 @@ export class Router {
 				}
 
 				requestAnimationFrame(async () => {
-					await parentLayer?.loader;
-
 					layer.loader = new Promise(async done => {
 						await parentLayer?.loader;
 

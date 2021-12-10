@@ -199,7 +199,11 @@ export class Router {
 				requestAnimationFrame(async () => {
 					await parentLayer?.loader;
 
-					layer.loader = new Promise(async done => done(await layer.renderedComponent.onload()));
+					layer.loader = new Promise(async done => {
+						await parentLayer?.loader;
+
+						done(await layer.renderedComponent.onload())
+					});
 
 					layer.loader.then(() => {
 						layer.renderedComponent.childNode = elementLayers[l + 1];

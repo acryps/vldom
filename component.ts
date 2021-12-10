@@ -44,7 +44,15 @@ export class Component {
 	}
 	
 	render(child?: Node): Node {
-		return document.createTextNode(`< ${this.constructor.name}(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(this.params[key])}`).join(", ")})${this.child ? `{${this.child.constructor.name}}` : ""} >`);
+		return this.createElement(
+			"component", { 
+				"type": this.constructor.name 
+			}, 
+			"< ", this.constructor.name,
+			`(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(this.params[key])}`).join(", ")})`, 
+			"{", this.child, "}", 
+			" >"
+		);
 	}
 	
 	createTimeout(handler: Function, time: number) {

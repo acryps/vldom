@@ -44,7 +44,7 @@ export class Component {
 	}
 	
 	render(child?: Node): Node {
-		return document.createTextNode(this.constructor.name);
+		return document.createTextNode(`${this.constructor.name}(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(key)}`).join(", ")})`);
 	}
 	
 	createTimeout(handler: Function, time: number) {

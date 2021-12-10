@@ -21,14 +21,13 @@ export class Component {
 	childNode: Node;
 	
 	onload(): Promise<void> | void {}
+	onunload(): Promise<void> | void {}
 
-	async onunload() {}
-
-	async onparameterchange(params) {
+	onparameterchange(params): Promise<void> | void {
 		this.reload();
 	}
 
-	async onchildparameterchange(params, route: Route, component: Component) {}
+	onchildparameterchange(params, route: Route, component: Component): Promise<void> | void {}
 
 	renderLoader() {
 		return document.createComment(`* ${this.constructor.name} *`);
@@ -50,7 +49,7 @@ export class Component {
 			}, 
 			"< ", this.constructor.name,
 			`(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(this.params[key])}`).join(", ")})`, 
-			"{", this.child, "}", 
+			"{", child, "}", 
 			" >"
 		);
 	}

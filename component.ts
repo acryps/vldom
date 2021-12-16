@@ -23,11 +23,8 @@ export class Component {
 	onload(): Promise<void> | void {}
 	onunload(): Promise<void> | void {}
 
-	onparameterchange(params): Promise<void> | void {
-		this.reload();
-	}
-
-	onchildparameterchange(params, route: Route, component: Component): Promise<void> | void {}
+	onparameterchange(params): Promise<void> | void {}
+	onchildchange(params, route: Route, component: Component): Promise<void> | void {}
 
 	renderLoader() {
 		return document.createComment(`* ${this.constructor.name} *`);
@@ -126,6 +123,19 @@ export class Component {
 		await this.update();
 	}
 
+	async unload() {
+		// stop all timers
+		for (let interval of this.timers.intervals) {
+			clearInterval(interval);
+		}
+
+		for (let timeout of this.timers.timeouts) {
+			clearTimeout(timeout);
+		}
+
+		await this.onunload();
+	}
+
 	// this method is used as a dummy before compilation with 'vldom compile'
 	static createElement(tag, attributes, ...contents) {
 		throw "cannot create element from uncompiled source";
@@ -133,6 +143,7 @@ export class Component {
 	
 	createElement(tag, attributes, ...contents) {
 		const element = document.createElement(tag);
+		element.id = "F_" + Math.random();
 		element.hostingComponent = this;
 
 		for (let item of contents) {

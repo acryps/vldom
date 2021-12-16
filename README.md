@@ -6,8 +6,12 @@
 
 Simple component system with integrated routing.
 
-> Breaking Change in 6.0.0: `onchange` has been renamed `onparameterchange` and `reload` will be automatically called when `onparameterchange`. `onchildchange` has been renamed to `onchildparameterchange` accordingly.
-> To prevent the `reload`-call, implement a custom `onparameterchange`.
+> 7.0.0 COMPLETE ENGINE REWRITE!
+>
+> * `onchildparameterchange` has been renamed to `onchildchange`.
+> * implementing `onparameterchange` will no longer cancel a reload.
+> * `async unload()` will be called when a component is removed
+> * use `this.createTimeout` and `this.createInterval` in `Components` to create timers that automatically stop when the component is unloaded
 
 ## Setup
 You'll need to enable jsx in your tsconfig

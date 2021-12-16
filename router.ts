@@ -17,6 +17,8 @@ export class Router {
 	private root;
 	private routes;
 
+	private routeReloader: Promise<void>;
+
 	constructor(
 		root: RouteableRouteGroup | typeof Component, 
 		routes?: {
@@ -113,25 +115,43 @@ export class Router {
 		return items;
 	}
 
+	updatingTo;
+
 	async update() {
+		if (this.updatingTo) {
+			if (this.activePath != this.updatingTo) {
+				requestAnimationFrame(() => this.update());
+			}
+			
+			return
+		}
+
+		this.updatingTo = this.activePath;
+
+		await this.dispatchUpdate();
+
+		this.updatingTo = false;
+	}
+
+	async dispatchUpdate() {
 		const path = this.activePath;
 
 		if (this.renderedPath == path) {
 			return;
 		}
 
+		// get new route
 		const updatedRoute = this.getActiveRoute();
 
 		if (!updatedRoute) {
 			throw new Error(`invalid route '${path}'`);
 		}
 
+		// get new parameters
 		const updatedParams = this.getActiveParams(path, updatedRoute);
-
-		const matchingRoutePath = this.renderedRoute ? this.getMatchingRoutePath(updatedRoute, updatedParams) : [];
-
 		const elementLayers: Node[] = [];
 
+		// create loader placeholders
 		for (let l = 0; l < updatedRoute.parents.length; l++) {
 			const layer = updatedRoute.parents[l];
 
@@ -145,103 +165,85 @@ export class Router {
 			elementLayers.push(layer.renderedComponent.renderLoader());
 		}
 
+		// add root placeholder (will be replaced after the root component has been loaded)
+		if (!this.renderedRoute) {
+			this.rootNode.appendChild(elementLayers[0]);
+		}
+
+		// destroy unused routes
+		if (this.renderedRoute) {
+			for (let l = updatedRoute.parents.length; l < this.renderedRoute.parents.length; l++) {
+				await this.renderedRoute.parents[l].renderedComponent.unload();
+			}
+		}
+
+		// update each layer of the new routing tree
 		for (let l = 0; l < updatedRoute.parents.length; l++) {
 			const layer = updatedRoute.parents[l];
 			const parentLayer = updatedRoute.parents[l - 1];
 			const params = updatedParams[l];
 
+			// update path
 			layer.clientRoute.path = layer.clientRoute.matchingPath;
 
 			for (let key in params) {
 				layer.clientRoute.path = layer.clientRoute.path.replace(`:${key}`, params[key]);
 			}
 
-			if (this.renderedRoute && l == matchingRoutePath.length && layer == this.renderedRoute.parents[l]) {
-				layer.renderedComponent.params = params;
-				layer.renderedComponent.activeRoute = layer.clientRoute;
-				layer.renderedComponent.parent = parentLayer?.renderedComponent;
+			const oldLayer = this.renderedRoute?.parents[l];
+			const oldParams = this.renderedParams ? this.renderedParams[l] : null;
 
-				new Promise(async done => done(await layer.renderedComponent.onparameterchange(params))).then(() => {
-					layer.renderedComponent.update(elementLayers[l + 1]);
-				});
-			} else if (l < matchingRoutePath.length) {
-				const nextLayer = updatedRoute.parents[l + 1];
-
-				layer.renderedComponent.params = params;
-				layer.renderedComponent.activeRoute = layer.clientRoute;
-				layer.renderedComponent.parent = parentLayer?.renderedComponent;
-
-				if (this.renderedRoute && nextLayer && layer == this.renderedRoute.parents[l] && nextLayer != this.renderedRoute.parents[l + 1]) {
-					new Promise(async done => done(await layer.renderedComponent.onparameterchange(params))).then(() => {
+			// check if the layers component has changed
+			if (oldLayer?.component == layer.component) {
+				// check if the parameters have changed
+				if (JSON.stringify(params) == JSON.stringify(oldParams)) {
+					// check if this layer is the last before any new layers
+					if (updatedRoute.parents[l + 1] && this.renderedRoute?.parents[l + 1] != updatedRoute.parents[l + 1]) {
+						// update the layer using a placeholder
 						layer.renderedComponent.update(elementLayers[l + 1]);
-					});
-				} else if (!nextLayer) {
-					layer.renderedComponent.childNode = null;
-					layer.renderedComponent.child = null;
-
-					new Promise(async done => done(await layer.renderedComponent.onparameterchange(params))).then(() => {
-						layer.renderedComponent.update(null);
-					});
+					} else {
+						// notifiy about the clients changes
+						layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
+					}
 				} else {
-					layer.renderedComponent.onchildparameterchange(params, layer.clientRoute, layer.renderedComponent);
+					// assign new parameters
+					layer.renderedComponent.params = params;
+
+					parentLayer?.renderedComponent.update(elementLayers[l]);
+
+					// call parameter change handler and reload the component
+					await layer.renderedComponent.onparameterchange(params);
+					await layer.renderedComponent.onload();
+
+					// update the components contents
+					layer.renderedComponent.update(elementLayers[l + 1]);
+
+					elementLayers[l].parentNode.replaceChild(layer.renderedComponent.rootNode, elementLayers[l]);
 				}
 			} else {
-				layer.renderedComponent = new layer.component();
-				layer.renderedComponent.params = params;
-				layer.renderedComponent.activeRoute = layer.clientRoute;
-				layer.renderedComponent.parent = parentLayer?.renderedComponent;
+				// create a new instance of the layers component
+				const instance = new layer.component();
+				instance.params = params;
+				instance.parent = parentLayer?.renderedComponent;
+				instance.activeRoute = layer.clientRoute;
 
-				if (parentLayer) {
-					parentLayer.renderedComponent.child = layer.renderedComponent;
-					parentLayer.renderedComponent.childNode = elementLayers[l];
-				}
+				layer.renderedComponent = instance;
 
-				requestAnimationFrame(async () => {
-					layer.loader = new Promise(async done => {
-						await parentLayer?.loader;
+				// await loader
+				await instance.onload();
 
-						done(await layer.renderedComponent.onload())
-					});
+				// render component
+				instance.rootNode = instance.render(elementLayers[l + 1]);
 
-					layer.loader.then(() => {
-						layer.renderedComponent.childNode = elementLayers[l + 1];
+				await oldLayer?.renderedComponent.unload();
 
-						const node = layer.renderedComponent.render(elementLayers[l + 1]);
-						layer.renderedComponent.rootNode = node;
-
-						if (elementLayers[l].parentNode) {
-							elementLayers[l].parentNode.replaceChild(node, elementLayers[l]);
-						}
-
-						if (parentLayer) {
-							parentLayer.renderedComponent.childNode = node;
-						}
-						
-						elementLayers[l] = node;
-					}).catch(error => {
-						layer.renderedComponent.childNode = elementLayers[l + 1];
-
-						const node = layer.renderedComponent.renderError(error);
-						layer.renderedComponent.rootNode = node;
-
-						if (elementLayers[l].parentNode) {
-							elementLayers[l].parentNode.replaceChild(node, elementLayers[l]);
-						}
-
-						if (parentLayer) {
-							parentLayer.renderedComponent.childNode = node;
-						}
-						
-						elementLayers[l] = node;
-					});
-				});
+				// replace placeholder with new node
+				elementLayers[l].parentNode?.replaceChild(instance.rootNode, elementLayers[l]);
+				elementLayers[l] = instance.rootNode;
 			}
 		}
 
-		if (!this.renderedRoute) {
-			this.rootNode.appendChild(elementLayers[0]);
-		}
-
+		// update routes
 		this.renderedPath = path;
 		this.renderedRoute = updatedRoute;
 		this.renderedParams = updatedParams;

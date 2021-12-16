@@ -6,8 +6,9 @@
 
 Simple component system with integrated routing.
 
-> 7.0.0 COMPLETE ENGINE REWRITE!
+> version 7: COMPLETE ENGINE REWRITE
 >
+> Breaking Changes
 > * `onchildparameterchange` has been renamed to `onchildchange`.
 > * implementing `onparameterchange` will no longer cancel a reload.
 > * `async unload()` will be called when a component is removed

@@ -204,6 +204,11 @@ export class Router {
 					} else {
 						// notifiy about the clients changes
 						layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
+
+						// check if this is now the top layer and remove the child if nescessary
+						if (!updatedRoute.parents[l + 1]) {
+							layer.renderedComponent.update(null);
+						}
 					}
 				} else {
 					// assign new parameters

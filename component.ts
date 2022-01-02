@@ -143,7 +143,6 @@ export class Component {
 	
 	createElement(tag, attributes, ...contents) {
 		const element = document.createElement(tag);
-		element.id = "F_" + Math.random();
 		element.hostingComponent = this;
 
 		for (let item of contents) {

@@ -185,6 +185,7 @@ export class Router {
 
 			// update path
 			layer.clientRoute.path = layer.clientRoute.matchingPath;
+			layer.clientRoute.child = updatedRoute.parents[l + 1]?.clientRoute;
 
 			for (let key in params) {
 				layer.clientRoute.path = layer.clientRoute.path.replace(`:${key}`, params[key]);

@@ -291,6 +291,7 @@ export class Router {
 
 			constructedRoute.clientRoute.matchingPath = path;
 			constructedRoute.clientRoute.parent = parent && parent.clientRoute;
+			constructedRoute.clientRoute.component = constructedRoute.component;
 
 			this.constructedRoutes.push(constructedRoute);
 

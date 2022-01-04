@@ -212,6 +212,8 @@ export class Component {
 
 	navigate(path: string) {
 		Router.global.navigate(path, this);
+
+		return document.createComment(path);
 	}
 
 	remove() {

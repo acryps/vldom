@@ -8,6 +8,10 @@ export class Router {
 
 	rootNode: Node;
 
+	onerror(error: Error, component?: Component) {
+		console.log(`Error occurred in component`, component, error);
+	}
+
 	private renderedPath: string;
 	private renderedRoute: ConstructedRoute;
 	private renderedParams: any[];
@@ -16,8 +20,6 @@ export class Router {
 
 	private root;
 	private routes;
-
-	private routeReloader: Promise<void>;
 
 	constructor(
 		root: RouteableRouteGroup | typeof Component, 
@@ -201,30 +203,42 @@ export class Router {
 					// check if this layer is the last before any new layers
 					if (updatedRoute.parents[l + 1] && this.renderedRoute?.parents[l + 1] != updatedRoute.parents[l + 1]) {
 						// update the layer using a placeholder
-						layer.renderedComponent.update(elementLayers[l + 1]);
+						try {
+							layer.renderedComponent.update(elementLayers[l + 1]);
+						} catch (error) {
+							this.onerror(error, layer.renderedComponent);
+						}
 					} else {
 						// notifiy about the clients changes
-						layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
+						try {
+							layer.renderedComponent.onchildchange(params, layer.clientRoute, layer.renderedComponent);
 
-						// check if this is now the top layer and remove the child if nescessary
-						if (!updatedRoute.parents[l + 1]) {
-							layer.renderedComponent.update(null);
+							// check if this is now the top layer and remove the child if nescessary
+							if (!updatedRoute.parents[l + 1]) {
+								layer.renderedComponent.update(null);
+							}
+						} catch (error) {
+							this.onerror(error, layer.renderedComponent);
 						}
 					}
 				} else {
 					// assign new parameters
 					layer.renderedComponent.params = params;
 
-					parentLayer?.renderedComponent.update(elementLayers[l]);
+					try {
+						parentLayer?.renderedComponent.update(elementLayers[l]);
 
-					// call parameter change handler and reload the component
-					await layer.renderedComponent.onparameterchange(params);
-					await layer.renderedComponent.onload();
+						// call parameter change handler and reload the component
+						await layer.renderedComponent.onparameterchange(params);
+						await layer.renderedComponent.onload();
 
-					// update the components contents
-					layer.renderedComponent.update(elementLayers[l + 1]);
+						// update the components contents
+						layer.renderedComponent.update(elementLayers[l + 1]);
 
-					elementLayers[l].parentNode.replaceChild(layer.renderedComponent.rootNode, elementLayers[l]);
+						elementLayers[l].parentNode.replaceChild(layer.renderedComponent.rootNode, elementLayers[l]);
+					} catch (error) {
+						this.onerror(error, layer.renderedComponent);
+					}
 				}
 			} else {
 				// create a new instance of the layers component
@@ -235,17 +249,21 @@ export class Router {
 
 				layer.renderedComponent = instance;
 
-				// await loader
-				await instance.onload();
+				try {
+					// await loader
+					await instance.onload();
 
-				// render component
-				instance.rootNode = instance.render(elementLayers[l + 1]);
+					// render component
+					instance.rootNode = instance.render(elementLayers[l + 1]);
 
-				await oldLayer?.renderedComponent.unload();
+					await oldLayer?.renderedComponent.unload();
 
-				// replace placeholder with new node
-				elementLayers[l].parentNode?.replaceChild(instance.rootNode, elementLayers[l]);
-				elementLayers[l] = instance.rootNode;
+					// replace placeholder with new node
+					elementLayers[l].parentNode?.replaceChild(instance.rootNode, elementLayers[l]);
+					elementLayers[l] = instance.rootNode;
+				} catch (error) {
+					this.onerror(error, layer.renderedComponent);
+				}
 			}
 		}
 

@@ -204,6 +204,7 @@ export class Router {
 					if (updatedRoute.parents[l + 1] && this.renderedRoute?.parents[l + 1] != updatedRoute.parents[l + 1]) {
 						// update the layer using a placeholder
 						try {
+							layer.renderedComponent.childNode = elementLayers[l + 1]
 							layer.renderedComponent.update(elementLayers[l + 1]);
 						} catch (error) {
 							this.onerror(error, layer.renderedComponent);
@@ -215,6 +216,7 @@ export class Router {
 
 							// check if this is now the top layer and remove the child if nescessary
 							if (!updatedRoute.parents[l + 1]) {
+								layer.renderedComponent.childNode = null
 								layer.renderedComponent.update(null);
 							}
 						} catch (error) {
@@ -226,16 +228,24 @@ export class Router {
 					layer.renderedComponent.params = params;
 
 					try {
-						parentLayer?.renderedComponent.update(elementLayers[l]);
+						if (parentLayer) {
+							parentLayer.renderedComponent.childNode = elementLayers[l]
+							parentLayer.renderedComponent.update(elementLayers[l]);
+						}
 
 						// call parameter change handler and reload the component
 						await layer.renderedComponent.onparameterchange(params);
 						await layer.renderedComponent.onload();
 
 						// update the components contents
+						layer.renderedComponent.childNode = elementLayers[l + 1]
 						layer.renderedComponent.update(elementLayers[l + 1]);
 
 						elementLayers[l].parentNode.replaceChild(layer.renderedComponent.rootNode, elementLayers[l]);
+
+						if (parentLayer) {
+							parentLayer.renderedComponent.childNode = layer.renderedComponent.rootNode
+						}
 					} catch (error) {
 						this.onerror(error, layer.renderedComponent);
 					}
@@ -261,6 +271,10 @@ export class Router {
 					// replace placeholder with new node
 					elementLayers[l].parentNode?.replaceChild(instance.rootNode, elementLayers[l]);
 					elementLayers[l] = instance.rootNode;
+
+					if (parentLayer) {
+						parentLayer.renderedComponent.childNode = instance.rootNode
+					}
 				} catch (error) {
 					this.onerror(error, layer.renderedComponent);
 				}

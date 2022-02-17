@@ -5,6 +5,7 @@ import { Route } from "./route";
 
 export class Router {
 	static global: Router;
+	static parameterMatcher = '(([\S]|[^\/])+)';
 
 	rootNode: Node;
 
@@ -58,7 +59,7 @@ export class Router {
 		if (path[0] == "/") {
 			return path;
 		} else if (relative) {
-			return this.resolve(`${relative.activeRoute.fullPath}/${path}`);
+			return this.resolve(`${relative.route.fullPath}/${path}`);
 		} else {
 			return this.resolve(`${this.activePath}/${path}`);
 		}
@@ -160,7 +161,8 @@ export class Router {
 			if (!updatedRoute.parents[l].renderedComponent) {
 				layer.renderedComponent = new layer.component();
 				layer.renderedComponent.params = updatedParams[l];
-				layer.renderedComponent.activeRoute = layer.clientRoute;
+				layer.renderedComponent.route = layer.clientRoute;
+				layer.renderedComponent.router = this;
 				layer.renderedComponent.parent = updatedRoute.parents[l - 1]?.renderedComponent;
 			}
 
@@ -255,7 +257,8 @@ export class Router {
 				const instance = new layer.component();
 				instance.params = params;
 				instance.parent = parentLayer?.renderedComponent;
-				instance.activeRoute = layer.clientRoute;
+				instance.route = layer.clientRoute;
+				instance.router = this;
 
 				layer.renderedComponent = instance;
 
@@ -312,8 +315,8 @@ export class Router {
 			const route = routes[path];
 
 			const constructedRoute = {
-				path: new RegExp(`^${`${root}${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, "(.[^\\/]+)")}$`),
-				openStartPath: new RegExp(`${`${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, "(.[^\\/]+)")}$`),
+				path: new RegExp(`^${`${root}${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, Router.parameterMatcher)}$`),
+				openStartPath: new RegExp(`${`${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, Router.parameterMatcher)}$`),
 				component: typeof route == "function" ? route : (route as any).component,
 				parent: parent,
 				params: (path.match(/:[a-zA-Z0-9]+/g) || []).map(key => key.replace(":", "")),

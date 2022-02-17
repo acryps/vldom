@@ -12,7 +12,9 @@ export class Component {
 		timeouts: []
 	};
 	
-	activeRoute: Route;
+	route: Route;
+	router: Router;
+
 	params: any;
 	parent?: Component;
 	rootNode: Node;
@@ -247,4 +249,29 @@ export class Component {
 
 		return tree;
 	}
+
+	updateParameters(parameters) {
+        for (let key in parameters) {
+            if (parameters[key] === null) {
+                delete this.params[key];
+            } else {
+                this.params[key] = `${parameters[key]}`;
+            }
+        }
+
+        let path = this.route.matchingPath;
+
+        for (let key in this.params) {
+            path = path.replace(`:${key}`, this.params[key]);
+        }
+
+        let parents = '';
+        let parent = this.route.parent;
+
+        while (parent = parent.parent) {
+            parents = `${parent.path}${parents}`;
+        }
+
+		this.router.activePath = this.router.updatingTo = this.router.activePath.replace(`${parents}${this.route.path}`, `${parents}${path}`);
+    }
 }

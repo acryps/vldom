@@ -7,7 +7,7 @@ export class Router {
 	static global: Router;
 	
 	static parameterNameMatcher = /:[a-zA-Z0-9]+/g;
-	static parameterMatcher = '[^/]+';
+	static parameterMatcher = '([^/]+)';
 
 	rootNode: Node;
 

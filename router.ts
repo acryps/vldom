@@ -5,7 +5,9 @@ import { Route } from "./route";
 
 export class Router {
 	static global: Router;
-	static parameterMatcher = '(([\\S]|[^\/])+)';
+	
+	static parameterNameMatcher = /:[a-zA-Z0-9]+/g;
+	static parameterMatcher = '[^/]+';
 
 	rootNode: Node;
 
@@ -321,11 +323,11 @@ export class Router {
 			const route = routes[path];
 
 			const constructedRoute = {
-				path: new RegExp(`^${`${root}${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, Router.parameterMatcher)}$`),
-				openStartPath: new RegExp(`${`${path}`.split("/").join("\\/").replace(/:[a-zA-Z0-9]+/g, Router.parameterMatcher)}$`),
+				path: new RegExp(`^${`${root}${path}`.split("/").join("\\/").replace(Router.parameterNameMatcher, Router.parameterMatcher)}$`),
+				openStartPath: new RegExp(`${`${path}`.split("/").join("\\/").replace(Router.parameterNameMatcher, Router.parameterMatcher)}$`),
 				component: typeof route == "function" ? route : (route as any).component,
 				parent: parent,
-				params: (path.match(/:[a-zA-Z0-9]+/g) || []).map(key => key.replace(":", "")),
+				params: (path.match(Router.parameterNameMatcher) || []).map(key => key.replace(":", "")),
 				parents: [],
 				clientRoute: new Route()
 			}

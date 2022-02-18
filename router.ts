@@ -5,13 +5,15 @@ import { Route } from "./route";
 
 export class Router {
 	static global: Router;
-	static parameterMatcher = '(([\S]|[^\/])+)';
+	static parameterMatcher = '(([\\S]|[^\/])+)';
 
 	rootNode: Node;
 
 	onerror(error: Error, component?: Component) {
 		console.log(`Error occurred in component`, component, error);
 	}
+
+	storedPath: string;
 
 	private renderedPath: string;
 	private renderedRoute: ConstructedRoute;
@@ -39,6 +41,8 @@ export class Router {
 				this.routes = root.children;
 			}
 		}
+
+		this.storedPath = this.activePath;
 	}
 
 	get activePath() {
@@ -46,6 +50,8 @@ export class Router {
 	}
 
 	set activePath(value: string) {
+		this.storedPath = value;
+		
 		location.hash = `#${value}`;
 	}
 
@@ -106,7 +112,7 @@ export class Router {
 			const matches = path.match(route.openStartPath).slice(1);
 
 			for (let i = 0; i < route.params.length; i++) {
-				item[route.params[i]] = matches[i];
+				item[route.params[i]] = matches[i * 2];
 			}
 
 			items.unshift(item);

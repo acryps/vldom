@@ -265,13 +265,7 @@ export class Component {
             path = path.replace(`:${key}`, this.params[key]);
         }
 
-        let parents = '';
-        let parent = this.route.parent;
-
-        while (parent = parent.parent) {
-            parents = `${parent.path}${parents}`;
-        }
-
-		this.router.activePath = this.router.updatingTo = this.router.activePath.replace(`${parents}${this.route.path}`, `${parents}${path}`);
+        this.router.activePath = this.router.updatingTo = this.router.storedPath.replace(this.route.fullPath, `${this.route.parent?.fullPath || ''}${path}`);
+        this.route.path = path;
     }
 }

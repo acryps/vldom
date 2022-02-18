@@ -114,7 +114,7 @@ export class Router {
 			const matches = path.match(route.openStartPath).slice(1);
 
 			for (let i = 0; i < route.params.length; i++) {
-				item[route.params[i]] = matches[i * 2];
+				item[route.params[i]] = matches[i];
 			}
 
 			items.unshift(item);

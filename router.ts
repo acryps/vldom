@@ -230,7 +230,7 @@ export class Router {
 					if (updatedRoute.parents[l + 1] && this.renderedRoute?.parents[l + 1] != updatedRoute.parents[l + 1]) {
 						// update the layer using a placeholder
 						try {
-							layer.renderedComponent.childNode = elementLayers[l + 1]
+							layer.renderedComponent.childNode = elementLayers[l + 1];
 							layer.renderedComponent.update(elementLayers[l + 1]);
 						} catch (error) {
 							this.onerror(error, layer.renderedComponent);

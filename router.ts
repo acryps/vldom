@@ -209,7 +209,23 @@ export class Router {
 			// check if the layers component has changed
 			if (oldLayer?.component == layer.component) {
 				// check if the parameters have changed
-				if (JSON.stringify(params) == JSON.stringify(oldParams)) {
+				let changed = false;
+
+				if (Object.keys(params).length == Object.keys(oldParams).length) {
+					for (let key in params) {
+						if (key in oldParams) {
+							if (params[key] !== oldParams[key]) {
+								changed = true;
+							}
+						} else {
+							changed = true;
+						}
+					}
+				} else {
+					changed = true;
+				}
+
+				if (changed) {
 					// check if this layer is the last before any new layers
 					if (updatedRoute.parents[l + 1] && this.renderedRoute?.parents[l + 1] != updatedRoute.parents[l + 1]) {
 						// update the layer using a placeholder

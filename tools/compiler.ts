@@ -1,15 +1,15 @@
-import fs = require("fs");
-import esprima = require("esprima");
+import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { parseScript } from 'espree';
 
 export class DomCompiler {
 	static configFile = "tsconfig.json";
 
 	constructor() {
-		if (!fs.existsSync(DomCompiler.configFile)) {
+		if (!existsSync(DomCompiler.configFile)) {
 			throw new Error(`no '${DomCompiler.configFile}' found in '${process.cwd()}'`);
 		}
 
-		const config = JSON.parse(fs.readFileSync(DomCompiler.configFile).toString());
+		const config = JSON.parse(readFileSync(DomCompiler.configFile).toString());
 
 		if (config.compilerOptions.outFile) {
 			this.compile(config.compilerOptions.outFile);
@@ -19,7 +19,7 @@ export class DomCompiler {
 	}
 
 	compile(path: string) {
-		let source = fs.readFileSync(path).toString();
+		let source = readFileSync(path).toString();
 
 		if (source.trim().startsWith("// @vldom ignore")) {
 			return;
@@ -33,7 +33,7 @@ export class DomCompiler {
 
 		const replace = [];
 
-        esprima.parseScript(source, {
+        parseScript(source, {
             range: true
         }, (node, meta) => {
             if (node.type == "CallExpression" && node.callee.type == "MemberExpression" && node.callee.property?.name == "createElement" && (
@@ -76,14 +76,14 @@ export class DomCompiler {
             offset += item.length - item.content.length;
         }
         
-        fs.writeFileSync(path, `// @vldom parsed\n${source}`);
+        writeFileSync(path, `// @vldom parsed\n${source}`);
 	}
 
 	scan(directory: string) {
-		for (let item of fs.readdirSync(directory)) {
+		for (let item of readdirSync(directory)) {
 			const path = `${directory}/${item}`;
 
-			if (fs.lstatSync(path).isDirectory()) {
+			if (lstatSync(path).isDirectory()) {
 				this.scan(path);
 			} else if (path.endsWith(".js")) {
 				try {

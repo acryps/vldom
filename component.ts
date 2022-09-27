@@ -139,7 +139,12 @@ export class Component {
 	}
 
 	// this method is used as a dummy before compilation with 'vldom compile'
+	// if you use parcel, the attribute list will contain a __self, which can be used to get the current component too (yay)
 	static createElement(tag, attributes, ...contents) {
+		if (attributes.__self) {
+			return attributes.__self.createElement(tag, attributes, ...contents);
+		}
+
 		throw "cannot create element from uncompiled source";
 	}
 	
@@ -152,12 +157,14 @@ export class Component {
 		}
 		
 		for (let key in attributes) {
-			const value = attributes[key];
-			
-			if (key in Component.directives) {
-				Component.directives[key](element, value, tag, attributes, contents);
-			} else if (value !== null) {
-				element.setAttribute(key, value);
+			if (key[0] != '_') {
+				const value = attributes[key];
+				
+				if (key in Component.directives) {
+					Component.directives[key](element, value, tag, attributes, contents);
+				} else if (value !== null) {
+					element.setAttribute(key, value);
+				}
 			}
 		}
 

@@ -272,7 +272,7 @@ export class Component {
             path = path.replace(`:${key}`, this.params[key]);
         }
 
-        this.router.activePath = this.router.updatingTo = this.router.storedPath.replace(this.route.fullPath, `${this.route.parent?.fullPath || ''}${path}`);
+        this.router.activePath = this.router.storedPath.replace(this.route.fullPath, `${this.route.parent?.fullPath || ''}${path}`);
         this.route.path = path;
     }
 }

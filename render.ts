@@ -8,7 +8,7 @@ export class Render {
 
     constructor(
         private renderedStack: RouteLayer[],
-        private stack: RouteLayer[]
+        public stack: RouteLayer[]
     ) {}
 
     abort() {
@@ -17,7 +17,7 @@ export class Render {
 
         // set the finished renderers as the rendered stack
         // -1 because the current element is not rendered yet
-        return this.stack.slice(0, layerIndex - 1);
+        return this.stack.slice(0, this.layerIndex - 1);
     }
 
     async render() {
@@ -28,7 +28,9 @@ export class Render {
 
             const existing = this.renderedStack[this.layerIndex];
 
-            if (!this.detached && layer.route == existing.route) {
+            console.log(this.layerIndex, layer.route.path, existing.route.path);
+
+            if (!this.detached && layer.route.path == existing.route.path) {
                 // nothing has to be changed about the current layer
                 // `.update()` might be called if this layers child changed
                 layer.rendered = existing.rendered;

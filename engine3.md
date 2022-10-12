@@ -24,36 +24,44 @@ class RouteLayer {
 
 class Router {
     renderedStack: RouteLayer[];
+    render: Render;
 
-    renderAborter: () => void;
-
-    update() {
-        if (this.renderAborter) {
-            this.renderAborter();
+    async render() {
+        if (this.renderer) {
+            this.renderedStack = this.renderer.abort();
         }
 
-        this.render(this.location);
+        this.renderer = new Render(this.renderedStack, this.buildRoutingStack());
+        await this.renderer.render();
+
+        this.renderedStack = this.renderer.stack;
+        this.renderer = null;
+    }
+}
+
+class Render {
+    detached = false;
+    rendering = true;
+
+    layerIndex = 0;
+
+    stack: RouteLayer[];
+
+    constructor(
+        private renderedStack: RouteLayer[],
+        private stack: RouteLayer[]
+    ) {}
+
+    abort() {
+        // will prevent returning `onload`s from continuing to render
+        this.rendering = false;
+
+        // set the finished renderers as the rendered stack
+        // -1 because the current element is not rendered yet
+        return stack.slice(0, layerIndex - 1);
     }
 
-    async render(location) {
-        const stack = this.buildRoutingStack(location);
-
-        let detached = false;
-        let rendering = true;
-
-        let layerIndex = 0;
-
-        // create abort function
-        // this will be called when a new `update()` call occurred while this render was going on 
-        this.renderAborter = () => {
-            // set the finished renderers as the rendered stack
-            // -1 because the current element is not rendered yet
-            this.renderedStack = stack.slice(0, layerIndex - 1);
-
-            // will prevent returning `onload`s from continuing to render
-            this.rendering = false;
-        };
-
+    async render() {
         for (; layerIndex < stack.length; layerIndex++) {
             const layer = stack[layerIndex];
             const parent = stack[layerIndex - 1];

@@ -58,7 +58,7 @@ export class Render {
 					layer.rendered.route = layer.route;
 					layer.rendered.params = layer.parameters;
 					layer.rendered.parent = parent?.rendered;
-					child.rendered.router = this.router;
+					layer.rendered.router = this.router;
 				}
 
 				// destroy existing component

@@ -1,4 +1,5 @@
 import { RouteLayer } from './route-layer';
+import { Router } from './router';
 
 export class Render {
 	detached = false;
@@ -7,7 +8,7 @@ export class Render {
 	layerIndex = 0;
 
 	constructor(
-		private root: Node,
+		private router: Router,
 		private renderedStack: RouteLayer[],
 		public stack: RouteLayer[]
 	) {}
@@ -57,6 +58,7 @@ export class Render {
 					layer.rendered.route = layer.route;
 					layer.rendered.params = layer.parameters;
 					layer.rendered.parent = parent.rendered;
+					child.rendered.router = this.router;
 				}
 
 				// destroy existing component
@@ -89,7 +91,8 @@ export class Render {
 					child.rendered = new child.component();
 					child.rendered.route = child.route;
 					child.rendered.params = child.parameters;
-					child.rendered.parent = layer.rendered
+					child.rendered.parent = layer.rendered;
+					child.rendered.router = this.router;
 
 					// create the placeholder
 					// will be a HTML comment by default, but a component might implement a custom loader element
@@ -115,10 +118,10 @@ export class Render {
 					layer.placeholder.parentNode.replaceChild(layer.rendered.rootNode, layer.placeholder);
 				} else if (existing) {
 					// replace the current root node with the new root node
-					this.root.replaceChild(existing.rendered.rootNode, layer.rendered.rootNode);
+					this.router.rootNode.replaceChild(existing.rendered.rootNode, layer.rendered.rootNode);
 				} else {
 					// there is no existing root node - append this new root node
-					this.root.appendChild(layer.rendered.rootNode);
+					this.router.rootNode.appendChild(layer.rendered.rootNode);
 				}
 
 				// if the render or load failed

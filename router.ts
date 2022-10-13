@@ -124,7 +124,7 @@ export class Router {
 			this.renderedStack = this.activeRender.abort();
 		}
 
-		this.activeRender = new Render(this.rootNode, this.renderedStack, this.buildRouteStack());
+		this.activeRender = new Render(this, this.renderedStack, this.buildRouteStack());
 
 		// this method might take some time as it will load all the components (`onload`)
 		await this.activeRender.render();

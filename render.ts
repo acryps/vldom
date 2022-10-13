@@ -56,6 +56,7 @@ export class Render {
 					layer.rendered = new layer.component();
 					layer.rendered.route = layer.route;
 					layer.rendered.params = layer.parameters;
+					layer.rendered.parent = parent.rendered;
 				}
 
 				// destroy existing component
@@ -88,6 +89,7 @@ export class Render {
 					child.rendered = new child.component();
 					child.rendered.route = child.route;
 					child.rendered.params = child.parameters;
+					child.rendered.parent = layer.rendered
 
 					// create the placeholder
 					// will be a HTML comment by default, but a component might implement a custom loader element

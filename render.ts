@@ -46,6 +46,8 @@ export class Render {
 					layer.rendered.update(null);
 				}
 			} else {
+				let layerError;
+
 				// route changed, renewed or any of its parents changed
 				const parent = this.stack[this.layerIndex - 1];
 
@@ -68,7 +70,12 @@ export class Render {
 					parent?.rendered.update(layer.placeholder);
 				}
 
-				await layer.rendered.onload();
+				// try to load the component, if it failed, render error and abort (later on)
+				try {
+					await layer.rendered.onload();
+				} catch (error) {
+					layerError = error;
+				}
 
 				// the data loaded by `onload` should be ignored and the whole render should be stopped when `abort` was called
 				if (!this.rendering) {
@@ -76,7 +83,7 @@ export class Render {
 				}
 
 				// create placeholder for child
-				if (child) {
+				if (child && !layerError) {
 					// already create child, as the loader is rendered on the instance itself
 					child.rendered = new child.component();
 					child.rendered.route = child.route;
@@ -88,7 +95,18 @@ export class Render {
 				}
 
 				// render new component, pass child placeholder as child node (if present)
-				layer.rendered.rootNode = layer.rendered.render(child?.placeholder);
+				// if the render fails or failed before, retry rendering using `renderError` - and still add it as a child
+				if (layerError) {
+					layer.rendered.rootNode = layer.rendered.renderError(error);
+				} else {
+					try {
+						layer.rendered.rootNode = layer.rendered.render(child?.placeholder);
+					} catch (error) {
+						layerError = error;
+
+						layer.rendered.rootNode = layer.rendered.renderError(error);
+					}
+				}
 
 				if (this.layerIndex) {
 					// if not a root child, replace this layers placeholder with the new node
@@ -99,6 +117,13 @@ export class Render {
 				} else {
 					// there is no existing root node - append this new root node
 					this.root.appendChild(layer.rendered.rootNode);
+				}
+
+				// if the render or load failed
+				if (layerError) {
+					layer.rendered.router.onerror(layerError, layer.rendered);
+
+					return;
 				}
 
 				// execute on child change

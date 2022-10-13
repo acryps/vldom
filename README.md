@@ -15,7 +15,7 @@ Simple component system with integrated routing.
 > * use `this.createTimeout` and `this.createInterval` in `Components` to create timers that automatically stop when the component is unloaded
 
 ## Setup
-You'll need to enable jsx in your tsconfig
+You"ll need to enable jsx in your tsconfig
 <pre>{
 	"compileOnSave": false,
 	"compilerOptions": {
@@ -49,7 +49,7 @@ export class ExampleComponent extends Component {
 new ExampleComponent().host(document.body);
 ```
 
-Let's extends this by creating a recursive component
+Let"s extends this by creating a recursive component
 
 ```
 export class ExampleRecursiveComponent extends Component {

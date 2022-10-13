@@ -1,4 +1,4 @@
-import { RouteLayer } from "./route-layer";
+import { RouteLayer } from './route-layer';
 
 export class Render {
     detached = false;

@@ -1,9 +1,9 @@
-import { Component } from "./component";
-import { ConstructedRoute } from "./constructed-route";
-import { RouteableRouteGroup, RouteGroup } from "./route-group";
-import { Route } from "./route";
-import { RouteLayer } from "./route-layer";
-import { Render } from "./render";
+import { Component } from './component';
+import { ConstructedRoute } from './constructed-route';
+import { RouteableRouteGroup, RouteGroup } from './route-group';
+import { Route } from './route';
+import { RouteLayer } from './route-layer';
+import { Render } from './render';
 
 export class Router {
 	static global: Router;
@@ -33,7 +33,7 @@ export class Router {
 			this.root = root as typeof Component;
 			this.routes = routes;
 		} else {
-			if (typeof root == "function") {
+			if (typeof root == 'function') {
 				this.root = root; 
 			} else {
 				this.root = root.component;
@@ -43,7 +43,7 @@ export class Router {
 	}
 
 	get activePath() {
-		return location.hash.replace("#", "");
+		return location.hash.replace('#', '');
 	}
 
 	set activePath(value: string) {
@@ -57,7 +57,7 @@ export class Router {
 	}
 
 	absolute(path: string, relative?: Component) {
-		if (path[0] == "/") {
+		if (path[0] == '/') {
 			return path;
 		} else if (relative) {
 			return this.resolve(`${relative.route.fullPath}/${path}`);
@@ -69,9 +69,9 @@ export class Router {
 	resolve(path: string) {
 		const resolved = [];
 
-		for (let component of path.split("/")) {
-			if (component && component != ".") {
-				if (component == "..") {
+		for (let component of path.split('/')) {
+			if (component && component != '.') {
+				if (component == '..') {
 					resolved.pop();
 				} else {
 					resolved.push(component);
@@ -79,7 +79,7 @@ export class Router {
 			}
 		}
 
-		return `/${resolved.join("/")}`;
+		return `/${resolved.join('/')}`;
 	}
 
 	getRoute(path: string) {
@@ -112,7 +112,7 @@ export class Router {
 
 			items.unshift(item);
 
-			path = path.replace(route.openStartPath, "");
+			path = path.replace(route.openStartPath, '');
 			route = route.parent;
 		}
 
@@ -173,7 +173,7 @@ export class Router {
 			const constructedRoute = {
 				path: new RegExp(`^${`${root}${path}`.split('/').join('\\/').replace(Router.parameterNameMatcher, Router.parameterMatcher)}$`),
 				openStartPath: new RegExp(`${`${path}`.split('/').join('\\/').replace(Router.parameterNameMatcher, Router.parameterMatcher)}$`),
-				component: typeof route == "function" ? route : (route as any).component,
+				component: typeof route == 'function' ? route : (route as any).component,
 				parent: parent,
 				params: (path.match(Router.parameterNameMatcher) || []).map(key => key.replace(':', '')),
 				parents: [],
@@ -208,13 +208,13 @@ export class Router {
 		Router.global = this;
 
 		this.routes = {
-			"": {
+			'': {
 				component: this.root,
 				children: this.routes
 			}
 		};
 		
-		this.constructRoutes("");
+		this.constructRoutes('');
 		this.rootNode = root;
 
 		this.update();

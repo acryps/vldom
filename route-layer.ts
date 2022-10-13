@@ -1,5 +1,5 @@
-import { Component } from "./component";
-import { Route } from "./route";
+import { Component } from './component';
+import { Route } from './route';
 
 export class RouteLayer {
     component: typeof Component;

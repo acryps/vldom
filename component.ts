@@ -1,6 +1,6 @@
-import { Route } from "./route";
-import { Router } from "./router";
-import { RouteableRouteGroup, RouteGroup } from "./route-group";
+import { Route } from './route';
+import { Router } from './router';
+import { RouteableRouteGroup, RouteGroup } from './route-group';
 
 export class Component {
 	static directives: { 
@@ -35,21 +35,21 @@ export class Component {
 	renderError(error: Error) {
 		console.error(error);
 		
-		return this.createElement("section", null, 
-			this.createElement("b", null, error.message),
-			this.createElement("pre", null, error.stack)
+		return this.createElement('section', null, 
+			this.createElement('b', null, error.message),
+			this.createElement('pre', null, error.stack)
 		);
 	}
 	
 	render(child?: Node): Node {
+		// create placeholder render
 		return this.createElement(
-			"component", { 
-				"type": this.constructor.name 
-			}, 
-			"< ", this.constructor.name,
-			`(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(this.params[key])}`).join(", ")})`, 
-			"{", child, "}", 
-			" >"
+			'component', 
+			{ type: this.constructor.name }, 
+			'< ', this.constructor.name,
+			`(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(this.params[key])}`).join(', ')})`, 
+			'{', child, '}', 
+			' >'
 		);
 	}
 	
@@ -149,7 +149,7 @@ export class Component {
 			return attributes.__self.createElement(tag, attributes, ...contents);
 		}
 
-		throw "cannot create element from uncompiled source";
+		throw 'cannot create element from uncompiled source';
 	}
 	
 	createElement(tag, attributes, ...contents) {

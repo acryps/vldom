@@ -1,8 +1,8 @@
-import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { parseScript } from 'espree';
 
 export class DomCompiler {
-	static configFile = "tsconfig.json";
+	static configFile = 'tsconfig.json';
 
 	constructor() {
 		if (!existsSync(DomCompiler.configFile)) {
@@ -21,11 +21,11 @@ export class DomCompiler {
 	compile(path: string) {
 		let source = readFileSync(path).toString();
 
-		if (source.trim().startsWith("// @vldom ignore")) {
+		if (source.trim().startsWith('// @vldom ignore')) {
 			return;
 		}
 
-		if (source.trim().startsWith("// @vldom parsed")) {
+		if (source.trim().startsWith('// @vldom parsed')) {
 			console.warn(`ignoring already parsed file '${path}'`);
 
 			return;
@@ -36,23 +36,23 @@ export class DomCompiler {
         parseScript(source, {
             range: true
         }, (node, meta) => {
-            if (node.type == "CallExpression" && node.callee.type == "MemberExpression" && node.callee.property?.name == "createElement" && (
+            if (node.type == 'CallExpression' && node.callee.type == 'MemberExpression' && node.callee.property?.name == 'createElement' && (
 				(
-					node.callee.object?.type == "MemberExpression" && node.callee.object?.property?.name == "Component"
-				) || node.callee.object?.name == "Component"
+					node.callee.object?.type == 'MemberExpression' && node.callee.object?.property?.name == 'Component'
+				) || node.callee.object?.name == 'Component'
 			)) {
                 const attributes = node.arguments[1];
-				const component = source.substring(node.range[0], node.callee.range[1]).replace(".createElement", "");
+				const component = source.substring(node.range[0], node.callee.range[1]).replace('.createElement', '');
 
                 replace.push({
                     offset: node.range[0],
                     length: node.callee.range[1] - node.range[0],
-                    content: "this.createElement"
+                    content: 'this.createElement'
                 });
 
-                if (attributes?.type == "ObjectExpression") {
+                if (attributes?.type == 'ObjectExpression') {
                     for (let property of attributes.properties) {
-                        if (property.key.type == "Literal" && property.key.value[0] == "$") {
+                        if (property.key.type == 'Literal' && property.key.value[0] == '$') {
                             const value = source.substring(property.value.range[0], property.value.range[1]);
 
                             replace.push({
@@ -85,7 +85,7 @@ export class DomCompiler {
 
 			if (lstatSync(path).isDirectory()) {
 				this.scan(path);
-			} else if (path.endsWith(".js")) {
+			} else if (path.endsWith('.js')) {
 				try {
 					this.compile(path);
 				} catch (e) {

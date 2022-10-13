@@ -52,8 +52,6 @@ export class Router {
 
 	navigate(path: string, relative?: Component) {
 		this.activePath = this.absolute(path, relative);
-
-		this.update();
 	}
 
 	absolute(path: string, relative?: Component) {

@@ -57,7 +57,7 @@ export class Render {
 					layer.rendered = new layer.component();
 					layer.rendered.route = layer.route;
 					layer.rendered.params = layer.parameters;
-					layer.rendered.parent = parent.rendered;
+					layer.rendered.parent = parent?.rendered;
 					child.rendered.router = this.router;
 				}
 

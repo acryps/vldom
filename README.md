@@ -6,13 +6,7 @@
 
 Simple component system with integrated routing.
 
-> version 7: COMPLETE ENGINE REWRITE
->
-> Breaking Changes
-> * `onchildparameterchange` has been renamed to `onchildchange`.
-> * implementing `onparameterchange` will no longer cancel a reload.
-> * `async unload()` will be called when a component is removed
-> * use `this.createTimeout` and `this.createInterval` in `Components` to create timers that automatically stop when the component is unloaded
+> version 9: new engine, even more efficient
 
 ## Setup
 You"ll need to enable jsx in your tsconfig

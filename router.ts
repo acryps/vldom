@@ -23,7 +23,7 @@ export class Router {
 	private routes: { [ key: string ]: RouteGroup; };
 
 	private renderedStack: RouteLayer[];
-    private activeRender: Render;
+	private activeRender: Render;
 
 	constructor(
 		root: RouteableRouteGroup | typeof Component, 
@@ -138,32 +138,32 @@ export class Router {
 
 	buildRouteStack() {
 		const path = this.activePath;
-        const route = this.getRoute(path);
-        const parameters = this.getActiveParams(path, route);
+		const route = this.getRoute(path);
+		const parameters = this.getActiveParams(path, route);
 
-        const stack = [];
+		const stack = [];
 
-        for (let layerIndex = 0; layerIndex < route.parents.length; layerIndex++) {
+		for (let layerIndex = 0; layerIndex < route.parents.length; layerIndex++) {
 			// clone the routes original client route
-            const clientRoute = new Route();
-            clientRoute.path = clientRoute.matchingPath = route.parents[layerIndex].clientRoute.matchingPath;
+			const clientRoute = new Route();
+			clientRoute.path = clientRoute.matchingPath = route.parents[layerIndex].clientRoute.matchingPath;
 			clientRoute.child = route.parents[layerIndex + 1]?.clientRoute;
-            clientRoute.parent = stack[layerIndex - 1]?.route;
-            clientRoute.component = route.parents[layerIndex].component;
+			clientRoute.parent = stack[layerIndex - 1]?.route;
+			clientRoute.component = route.parents[layerIndex].component;
 
 			// insert the active parameters into the client routes path
 			for (let key in parameters[layerIndex]) {
 				clientRoute.path = clientRoute.path.replace(`:${key}`, parameters[layerIndex][key]);
 			}
 
-            stack.push({
+			stack.push({
 				component: route.parents[layerIndex].component,
 				parameters: parameters[layerIndex],
 				route: clientRoute
 			});
-        }
+		}
 
-        return stack;
+		return stack;
 	}
 
 	constructRoutes(root, routes = this.routes, parent: ConstructedRoute = null) {

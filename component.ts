@@ -263,24 +263,24 @@ export class Component {
 
 	updateParameters(parameters) {
 		// update current parameter list
-        for (let key in parameters) {
-            if (parameters[key] === null) {
-                delete this.params[key];
-            } else {
-                this.params[key] = `${parameters[key]}`;
-            }
-        }
+		for (let key in parameters) {
+			if (parameters[key] === null) {
+				delete this.params[key];
+			} else {
+				this.params[key] = `${parameters[key]}`;
+			}
+		}
 
 		// re-generate parameter string
-        let path = this.route.matchingPath;
+		let path = this.route.matchingPath;
 
-        for (let key in this.params) {
-            path = path.replace(`:${key}`, this.params[key]);
-        }
+		for (let key in this.params) {
+			path = path.replace(`:${key}`, this.params[key]);
+		}
 
 		this.route.path = path;
 
 		// push the state to the browser (will not call `onhashchange`)
-        history.pushState(null, null, `#${this.route.fullPath}`);
-    }
+		history.pushState(null, null, `#${this.route.fullPath}`);
+	}
 }

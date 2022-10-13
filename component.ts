@@ -135,6 +135,10 @@ export class Component {
 			clearTimeout(timeout);
 		}
 
+		if (this.child) {
+			await this.child.unload();
+		}
+
 		await this.onunload();
 	}
 
@@ -258,6 +262,7 @@ export class Component {
 	}
 
 	updateParameters(parameters) {
+		// update current parameter list
         for (let key in parameters) {
             if (parameters[key] === null) {
                 delete this.params[key];
@@ -266,13 +271,16 @@ export class Component {
             }
         }
 
+		// re-generate parameter string
         let path = this.route.matchingPath;
 
         for (let key in this.params) {
             path = path.replace(`:${key}`, this.params[key]);
         }
 
-        this.router.activePath = this.router.storedPath.replace(this.route.fullPath, `${this.route.parent?.fullPath || ''}${path}`);
-        this.route.path = path;
+		this.route.path = path;
+
+		// push the state to the browser (will not call `onhashchange`)
+        history.pushState(null, null, `#${this.route.fullPath}`);
     }
 }

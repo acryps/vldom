@@ -21,6 +21,8 @@ export class Component {
 
 	child?: Component;
 	childNode: Node;
+
+	get activeRoute() { return this.route; }
 	
 	onload(): Promise<void> | void {}
 	onunload(): Promise<void> | void {}

@@ -1,5 +1,5 @@
-import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } from 'fs';
-import { parseScript } from 'espree';
+const { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } = require('fs');
+const { parseScript } = require('espree');
 
 export class DomCompiler {
 	static configFile = 'tsconfig.json';

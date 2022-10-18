@@ -1,10 +1,10 @@
-import { DomCompiler } from './compiler';
+const compiler = require('./compiler');
 
 const args = process.argv.slice(2);
 
 switch (args[0]) {
 	case 'compile':
-		new DomCompiler();
+		new compiler.DomCompiler();
 
 		break;
 

@@ -1,5 +1,5 @@
 import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } from 'fs';
-import { parseScript } from 'espree';
+import { parse } from 'espree';
 
 export class DomCompiler {
 	static configFile = 'tsconfig.json';
@@ -33,8 +33,10 @@ export class DomCompiler {
 
 		const replace = [];
 
-        parseScript(source, {
-            range: true
+        parse(source, {
+			ecmaVersion: "latest",
+            sourceType: "script",
+			range: true
         }, (node, meta) => {
             if (node.type == 'CallExpression' && node.callee.type == 'MemberExpression' && node.callee.property?.name == 'createElement' && (
 				(

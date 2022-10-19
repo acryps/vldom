@@ -1,6 +1,6 @@
-import { Route } from "./route";
-import { Router } from "./router";
-import { RouteableRouteGroup, RouteGroup } from "./route-group";
+import { Route } from './route';
+import { Router } from './router';
+import { RouteableRouteGroup, RouteGroup } from './route-group';
 
 export class Component {
 	static directives: { 
@@ -21,6 +21,8 @@ export class Component {
 
 	child?: Component;
 	childNode: Node;
+
+	get activeRoute() { return this.route; }
 	
 	onload(): Promise<void> | void {}
 	onunload(): Promise<void> | void {}
@@ -35,21 +37,21 @@ export class Component {
 	renderError(error: Error) {
 		console.error(error);
 		
-		return this.createElement("section", null, 
-			this.createElement("b", null, error.message),
-			this.createElement("pre", null, error.stack)
+		return this.createElement('section', null, 
+			this.createElement('b', null, error.message),
+			this.createElement('pre', null, error.stack)
 		);
 	}
 	
 	render(child?: Node): Node {
+		// create placeholder render
 		return this.createElement(
-			"component", { 
-				"type": this.constructor.name 
-			}, 
-			"< ", this.constructor.name,
-			`(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(this.params[key])}`).join(", ")})`, 
-			"{", child, "}", 
-			" >"
+			'component', 
+			{ type: this.constructor.name }, 
+			'< ', this.constructor.name,
+			`(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(this.params[key])}`).join(', ')})`, 
+			'{', child, '}', 
+			' >'
 		);
 	}
 	
@@ -135,17 +137,15 @@ export class Component {
 			clearTimeout(timeout);
 		}
 
+		if (this.child) {
+			await this.child.unload();
+		}
+
 		await this.onunload();
 	}
 
-	// this method is used as a dummy before compilation with 'vldom compile'
-	// if you use parcel, the attribute list will contain a __self, which can be used to get the current component too (yay)
 	static createElement(tag, attributes, ...contents) {
-		if (attributes.__self) {
-			return attributes.__self.createElement(tag, attributes, ...contents);
-		}
-
-		throw "cannot create element from uncompiled source";
+		throw 'cannot create element from uncompiled source';
 	}
 	
 	createElement(tag, attributes, ...contents) {
@@ -258,21 +258,25 @@ export class Component {
 	}
 
 	updateParameters(parameters) {
-        for (let key in parameters) {
-            if (parameters[key] === null) {
-                delete this.params[key];
-            } else {
-                this.params[key] = `${parameters[key]}`;
-            }
-        }
+		// update current parameter list
+		for (let key in parameters) {
+			if (parameters[key] === null) {
+				delete this.params[key];
+			} else {
+				this.params[key] = `${parameters[key]}`;
+			}
+		}
 
-        let path = this.route.matchingPath;
+		// re-generate parameter string
+		let path = this.route.matchingPath;
 
-        for (let key in this.params) {
-            path = path.replace(`:${key}`, this.params[key]);
-        }
+		for (let key in this.params) {
+			path = path.replace(`:${key}`, this.params[key]);
+		}
 
-        this.router.activePath = this.router.updatingTo = this.router.storedPath.replace(this.route.fullPath, `${this.route.parent?.fullPath || ''}${path}`);
-        this.route.path = path;
-    }
+		this.route.path = path;
+
+		// push the state to the browser (will not call `onhashchange`)
+		history.pushState(null, null, `#${this.route.fullPath}`);
+	}
 }

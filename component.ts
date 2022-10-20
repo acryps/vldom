@@ -195,6 +195,8 @@ export class Component {
 			element.appendChild(placeholder);
 
 			item.parent = this;
+			item.route = this.route;
+			item.router = this.router;
 
 			(async () => {
 				await item.onload();

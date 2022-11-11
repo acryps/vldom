@@ -59,6 +59,10 @@ export class Render {
 					layer.rendered.params = layer.parameters;
 					layer.rendered.parent = parent?.rendered;
 					layer.rendered.router = this.router;
+
+					if (parent) {
+						parent.rendered.child = layer.rendered;
+					}
 				}
 
 				// destroy existing component
@@ -93,6 +97,8 @@ export class Render {
 					child.rendered.params = child.parameters;
 					child.rendered.parent = layer.rendered;
 					child.rendered.router = this.router;
+
+					layer.rendered.child = child.rendered;
 
 					// create the placeholder
 					// will be a HTML comment by default, but a component might implement a custom loader element

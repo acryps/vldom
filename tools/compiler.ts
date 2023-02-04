@@ -1,5 +1,6 @@
 import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { parse } from 'espree';
+import { traverse } from 'estraverse';
 
 export class DomCompiler {
 	static configFile = 'tsconfig.json';
@@ -33,40 +34,44 @@ export class DomCompiler {
 
 		const replace = [];
 
-        parse(source, {
+        const tree = parse(source, {
 			ecmaVersion: "latest",
             sourceType: "script",
 			range: true
-        }, (node, meta) => {
-            if (node.type == 'CallExpression' && node.callee.type == 'MemberExpression' && node.callee.property?.name == 'createElement' && (
-				(
-					node.callee.object?.type == 'MemberExpression' && node.callee.object?.property?.name == 'Component'
-				) || node.callee.object?.name == 'Component'
-			)) {
-                const attributes = node.arguments[1];
-				const component = source.substring(node.range[0], node.callee.range[1]).replace('.createElement', '');
-
-                replace.push({
-                    offset: node.range[0],
-                    length: node.callee.range[1] - node.range[0],
-                    content: 'this.createElement'
-                });
-
-                if (attributes?.type == 'ObjectExpression') {
-                    for (let property of attributes.properties) {
-                        if (property.key.type == 'Literal' && property.key.value[0] == '$') {
-                            const value = source.substring(property.value.range[0], property.value.range[1]);
-
-                            replace.push({
-                                offset: property.value.range[0],
-                                length: property.value.range[1] - property.value.range[0],
-                                content: `${component}.accessor(() => ${value}, value => ${value} = value)`
-                            });
-                        }
-                    }
-                }
-            }
         });
+		
+		traverse(tree, {
+			enter: (node) => {
+				if (node.type == 'CallExpression' && node.callee.type == 'MemberExpression' && node.callee.property?.name == 'createElement' && (
+					(
+						node.callee.object?.type == 'MemberExpression' && node.callee.object?.property?.name == 'Component'
+					) || node.callee.object?.name == 'Component'
+				)) {
+					const attributes = node.arguments[1];
+					const component = source.substring(node.range[0], node.callee.range[1]).replace('.createElement', '');
+
+					replace.push({
+						offset: node.range[0],
+						length: node.callee.range[1] - node.range[0],
+						content: 'this.createElement'
+					});
+
+					if (attributes?.type == 'ObjectExpression') {
+						for (let property of attributes.properties) {
+							if (property.key.type == 'Literal' && property.key.value[0] == '$') {
+								const value = source.substring(property.value.range[0], property.value.range[1]);
+
+								replace.push({
+									offset: property.value.range[0],
+									length: property.value.range[1] - property.value.range[0],
+									content: `${component}.accessor(() => ${value}, value => ${value} = value)`
+								});
+							}
+						}
+					}
+				}
+			}
+		});
 
         let offset = 0; 
 

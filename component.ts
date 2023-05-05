@@ -26,6 +26,7 @@ export class Component {
 	
 	onload(): Promise<void> | void {}
 	onunload(): Promise<void> | void {}
+	onerror(error): Promise<void> | void {}
 
 	onparameterchange(params): Promise<void> | void {}
 	onchildchange(params, route: Route, component: Component): Promise<void> | void {}

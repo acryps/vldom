@@ -108,6 +108,7 @@ export class Render {
 				// render new component, pass child placeholder as child node (if present)
 				// if the render fails or failed before, retry rendering using `renderError` - and still add it as a child
 				if (layerError) {
+					layer.rendered.onerror(layerError);
 					layer.rendered.rootNode = layer.rendered.renderError(layerError);
 				} else {
 					try {
@@ -115,6 +116,7 @@ export class Render {
 					} catch (error) {
 						layerError = error;
 
+						layer.rendered.renderError(error);
 						layer.rendered.rootNode = layer.rendered.renderError(error);
 					}
 				}

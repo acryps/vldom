@@ -131,7 +131,7 @@ export class Component {
 	}
 
 	async unload() {
-		this.loaded = true;
+		this.loaded = false;
 
 		// stop all timers
 		for (let interval of this.timers.intervals) {

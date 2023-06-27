@@ -11,6 +11,8 @@ export class Component {
 		intervals: [],
 		timeouts: []
 	};
+
+	loaded = true;
 	
 	route: Route;
 	router: Router;
@@ -24,12 +26,12 @@ export class Component {
 
 	get activeRoute() { return this.route; }
 	
-	onload(): Promise<void> | void {}
-	onunload(): Promise<void> | void {}
+	onload(): Promise<void> | void {}
+	onunload(): Promise<void> | void {}
 	onerror(error): Promise<void> | void {}
 
-	onparameterchange(params): Promise<void> | void {}
-	onchildchange(params, route: Route, component: Component): Promise<void> | void {}
+	onparameterchange(params): Promise<void> | void {}
+	onchildchange(params, route: Route, component: Component): Promise<void> | void {}
 
 	renderLoader() {
 		return document.createComment(`* ${this.constructor.name} *`);
@@ -129,6 +131,8 @@ export class Component {
 	}
 
 	async unload() {
+		this.loaded = true;
+
 		// stop all timers
 		for (let interval of this.timers.intervals) {
 			clearInterval(interval);

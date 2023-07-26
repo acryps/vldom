@@ -307,7 +307,7 @@ export class Component {
 
 		let fullPath = getFullPath(this);
 		
-		if (location.hash) {
+		if (location.href.includes('#')) {
 			fullPath = `#${fullPath}`;
 		}
 

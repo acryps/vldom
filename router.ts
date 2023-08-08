@@ -26,7 +26,9 @@ export class Router {
 	private activeRender: Render;
 
 	constructor(
-		root: RouteableRouteGroup | typeof Component, 
+		private getActivePath: () => string,
+		private setActivePath: (value: string) => void,
+		root: RouteableRouteGroup | typeof Component,
 		routes?: { [ key: string ]: RouteGroup; }
 	) {
 		if (routes) {
@@ -34,7 +36,7 @@ export class Router {
 			this.routes = routes;
 		} else {
 			if (typeof root == 'function') {
-				this.root = root; 
+				this.root = root;
 			} else {
 				this.root = root.component;
 				this.routes = root.children;
@@ -43,11 +45,11 @@ export class Router {
 	}
 
 	get activePath() {
-		return location.hash.replace('#', '');
+		return this.getActivePath();
 	}
 
 	set activePath(value: string) {
-		location.hash = `#${value}`;
+		this.setActivePath(value);
 	}
 
 	navigate(path: string, relative?: Component) {
@@ -216,5 +218,23 @@ export class Router {
 		this.rootNode = root;
 
 		this.update();
+	}
+}
+
+export class PathRouter extends Router {
+	constructor(
+		root: RouteableRouteGroup | typeof Component,
+		routes?: { [ key: string ]: RouteGroup; }
+	) {
+		super(() => location.pathname, value => location.pathname = value, root, routes);
+	}
+}
+
+export class HashRouter extends Router {
+	constructor(
+		root: RouteableRouteGroup | typeof Component,
+		routes?: { [ key: string ]: RouteGroup; }
+	) {
+		super(() => location.hash.replace('#', ''), value => location.hash = `#${value}`, root, routes);
 	}
 }

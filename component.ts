@@ -281,9 +281,24 @@ export class Component {
 			path = path.replace(`:${key}`, this.params[key]);
 		}
 
-		this.route.path = path;
+		// Update path for each route
+		function updatePath(component: Component, layerIndex: number, path: string) {
+			let route = component.route;
+
+			for (let parentIndex = 0; parentIndex < layerIndex; parentIndex++) {
+				route = route.parent;
+			}
+
+			route.path = path;
+
+			if (component.child) {
+				updatePath(component.child, layerIndex + 1, path);
+			}
+		}
+
+		updatePath(this, 0, path);
 
 		// push the state to the browser (will not call `onhashchange`)
-		history.pushState(null, null, `#${this.route.fullPath}`);
+		history.pushState(null, null, this.router.urlPath);
 	}
 }

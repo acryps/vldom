@@ -26,6 +26,7 @@ export class Router {
 	private activeRender: Render;
 
 	constructor(
+		private getUrlPath: () => string,
 		private getActivePath: () => string,
 		private setActivePath: (value: string) => void,
 		root: RouteableRouteGroup | typeof Component,
@@ -42,6 +43,10 @@ export class Router {
 				this.routes = root.children;
 			}
 		}
+	}
+
+	get urlPath() {
+		return this.getUrlPath();
 	}
 
 	get activePath() {
@@ -226,7 +231,7 @@ export class PathRouter extends Router {
 		root: RouteableRouteGroup | typeof Component,
 		routes?: { [ key: string ]: RouteGroup; }
 	) {
-		super(() => location.pathname, value => location.pathname = value, root, routes);
+		super(() => location.pathname, () => location.pathname, value => location.pathname = value, root, routes);
 	}
 }
 
@@ -235,6 +240,6 @@ export class HashRouter extends Router {
 		root: RouteableRouteGroup | typeof Component,
 		routes?: { [ key: string ]: RouteGroup; }
 	) {
-		super(() => location.hash.replace('#', ''), value => location.hash = `#${value}`, root, routes);
+		super(() => location.hash, () => location.hash.replace('#', ''), value => location.hash = `#${value}`, root, routes);
 	}
 }

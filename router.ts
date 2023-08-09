@@ -5,7 +5,7 @@ import { Route } from './route';
 import { RouteLayer } from './route-layer';
 import { Render } from './render';
 
-export class Router {
+export class Router extends EventTarget {
 	static global: Router;
 	
 	static parameterNameMatcher = /:[a-zA-Z0-9]+/g;
@@ -25,13 +25,16 @@ export class Router {
 	private renderedStack: RouteLayer[];
 	private activeRender: Render;
 
+	private onParameterChangeEvent: CustomEvent<void> = new CustomEvent('onparameterchange', {});
+
 	constructor(
-		private getUrlPath: () => string,
-		private getActivePath: () => string,
-		private setActivePath: (value: string) => void,
+		public getActivePath: () => string,
+		public updateActivePath: (value: string) => void,
 		root: RouteableRouteGroup | typeof Component,
 		routes?: { [ key: string ]: RouteGroup; }
 	) {
+		super();
+
 		if (routes) {
 			this.root = root as typeof Component;
 			this.routes = routes;
@@ -45,20 +48,11 @@ export class Router {
 		}
 	}
 
-	get urlPath() {
-		return this.getUrlPath();
-	}
-
-	get activePath() {
-		return this.getActivePath();
-	}
-
-	set activePath(value: string) {
-		this.setActivePath(value);
-	}
+	addEventListener = (type: 'onparameterchange', callback: EventListenerOrEventListenerObject | null, options?: EventListenerOptions | boolean) => super.addEventListener;
 
 	navigate(path: string, relative?: Component) {
-		this.activePath = this.absolute(path, relative);
+		this.updateActivePath(this.absolute(path, relative));
+		this.update();
 	}
 
 	absolute(path: string, relative?: Component) {
@@ -67,7 +61,7 @@ export class Router {
 		} else if (relative) {
 			return this.resolve(`${relative.route.fullPath}/${path}`);
 		} else {
-			return this.resolve(`${this.activePath}/${path}`);
+			return this.resolve(`${this.getActivePath()}/${path}`);
 		}
 	}
 
@@ -98,11 +92,11 @@ export class Router {
 	}
 
 	getActiveRoute() {
-		return this.getRoute(this.activePath);
+		return this.getRoute(this.getActivePath());
 	}
 
-	getActiveParams(path: string, activeRoute: ConstructedRoute) {
-		const items: { [key: string]: string }[] = [];
+	getActiveParameters(path: string, activeRoute: ConstructedRoute) {
+		const items: Record<string, string>[] = [];
 
 		let route = activeRoute;
 
@@ -111,11 +105,42 @@ export class Router {
 
 			const matches = path.match(route.openStartPath).slice(1);
 
-			for (let i = 0; i < route.params.length; i++) {
-				item[route.params[i]] = matches[i];
+			for (let i = 0; i < route.parameters.length; i++) {
+				item[route.parameters[i]] = matches[i];
 			}
 
-			items.unshift(item);
+			items.unshift(new Proxy<any>(item, {
+				set(object, property, value) {
+					// re-generate parameter string
+					let path = this.route.matchingPath.replace(`:${property.toString()}`, value);
+		
+					// Update path for each route
+					function updatePath(component: Component, layerIndex: number, path: string) {
+						let route = component.route;
+		
+						for (let parentIndex = 0; parentIndex < layerIndex; parentIndex++) {
+							route = route.parent;
+						}
+		
+						route.path = path;
+		
+						if (component.child) {
+							updatePath(component.child, layerIndex + 1, path);
+						}
+					}
+		
+					updatePath(this, 0, path);
+
+					this.updateActivePath(path);
+					this.dispatchEvent(this.onParameterChangeEvent);
+		
+					object[property] = value;
+
+					console.log('Updated parameter', property, value);
+		
+					return true;
+				}
+			}));
 
 			path = path.replace(route.openStartPath, '');
 			route = route.parent;
@@ -142,9 +167,9 @@ export class Router {
 	}
 
 	buildRouteStack() {
-		const path = this.activePath;
+		const path = this.getActivePath();
 		const route = this.getRoute(path);
-		const parameters = this.getActiveParams(path, route);
+		const parameters = this.getActiveParameters(path, route);
 
 		const stack = [];
 
@@ -180,7 +205,7 @@ export class Router {
 				openStartPath: new RegExp(`${`${path}`.split('/').join('\\/').replace(Router.parameterNameMatcher, Router.parameterMatcher)}$`),
 				component: typeof route == 'function' ? route : (route as any).component,
 				parent: parent,
-				params: (path.match(Router.parameterNameMatcher) || []).map(key => key.replace(':', '')),
+				parameters: (path.match(Router.parameterNameMatcher) || []).map(key => key.replace(':', '')),
 				parents: [],
 				clientRoute: new Route()
 			}
@@ -231,7 +256,11 @@ export class PathRouter extends Router {
 		root: RouteableRouteGroup | typeof Component,
 		routes?: { [ key: string ]: RouteGroup; }
 	) {
-		super(() => this.activePath, () => location.pathname, value => location.pathname = value, root, routes);
+		super(() => location.pathname, value => history.pushState(null, null, value), root, routes);
+
+		onpopstate = () => {
+			this.update();
+		}
 	}
 }
 
@@ -240,6 +269,10 @@ export class HashRouter extends Router {
 		root: RouteableRouteGroup | typeof Component,
 		routes?: { [ key: string ]: RouteGroup; }
 	) {
-		super(() => `#${this.activePath}`, () => location.hash.replace('#', ''), value => location.hash = `#${value}`, root, routes);
+		super(() => location.hash.replace('#', ''), value => history.pushState(null, null, `#${value}`), root, routes);
+
+		onhashchange = () => {
+			this.update();
+		}
 	}
 }

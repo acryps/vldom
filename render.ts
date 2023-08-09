@@ -56,7 +56,7 @@ export class Render {
 				if (!layer.rendered) {
 					layer.rendered = new layer.component();
 					layer.rendered.route = layer.route;
-					layer.rendered.params = layer.parameters;
+					layer.rendered.parameters = layer.parameters;
 					layer.rendered.parent = parent?.rendered;
 					layer.rendered.router = this.router;
 
@@ -94,7 +94,7 @@ export class Render {
 					// already create child, as the loader is rendered on the instance itself
 					child.rendered = new child.component();
 					child.rendered.route = child.route;
-					child.rendered.params = child.parameters;
+					child.rendered.parameters = child.parameters;
 					child.rendered.parent = layer.rendered;
 					child.rendered.router = this.router;
 

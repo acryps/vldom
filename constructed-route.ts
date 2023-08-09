@@ -7,7 +7,7 @@ export class ConstructedRoute {
 	component: typeof Component;
 	parent: ConstructedRoute;
 	parents: ConstructedRoute[];
-	params: string[];
+	parameters: string[];
 	clientRoute: Route;
 	loader?: Promise<any>;
 

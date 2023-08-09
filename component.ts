@@ -17,37 +17,7 @@ export class Component {
 	route: Route;
 	router: Router;
 
-	params = new Proxy<any>({}, {
-		set(object, property, value) {
-			// re-generate parameter string
-			let path = this.route.matchingPath.replace(`:${property.toString()}`, value);
-
-			// Update path for each route
-			function updatePath(component: Component, layerIndex: number, path: string) {
-				let route = component.route;
-
-				for (let parentIndex = 0; parentIndex < layerIndex; parentIndex++) {
-					route = route.parent;
-				}
-
-				route.path = path;
-
-				if (component.child) {
-					updatePath(component.child, layerIndex + 1, path);
-				}
-			}
-
-			updatePath(this, 0, path);
-
-			// push the state to the browser (will not call `onhashchange`)
-			history.pushState(null, null, this.router.urlPath);
-
-			object[property] = value;
-
-			return true;
-		}
-	});
-
+	parameters: Record<string, string>;
 	parent?: Component;
 	rootNode: Node;
 
@@ -60,8 +30,7 @@ export class Component {
 	onunload(): Promise<void> | void {}
 	onerror(error): Promise<void> | void {}
 
-	onparameterchange(params): Promise<void> | void {}
-	onchildchange(params, route: Route, component: Component): Promise<void> | void {}
+	onchildchange(parameters, route: Route, component: Component): Promise<void> | void {}
 
 	renderLoader() {
 		return document.createComment(`* ${this.constructor.name} *`);
@@ -82,7 +51,7 @@ export class Component {
 			'component', 
 			{ type: this.constructor.name }, 
 			'< ', this.constructor.name,
-			`(${Object.keys(this.params).map(key => `${key}: ${JSON.stringify(this.params[key])}`).join(', ')})`, 
+			`(${Object.keys(this.parameters).map(key => `${key}: ${JSON.stringify(this.parameters[key])}`).join(', ')})`, 
 			'{', child, '}', 
 			' >'
 		);

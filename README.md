@@ -100,10 +100,10 @@ class BooksComponent extends Component {
 }
 
 class BookComponent extends Component {
-	params: { id: string }
+	parameters: { id: string }
 
 	render() {
-		return <p>Book with id {this.params.id}</p>;
+		return <p>Book with id {this.parameters.id}</p>;
 	}
 }
 

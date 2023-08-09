@@ -231,7 +231,7 @@ export class PathRouter extends Router {
 		root: RouteableRouteGroup | typeof Component,
 		routes?: { [ key: string ]: RouteGroup; }
 	) {
-		super(() => location.pathname, () => location.pathname, value => location.pathname = value, root, routes);
+		super(() => this.activePath, () => location.pathname, value => location.pathname = value, root, routes);
 	}
 }
 
@@ -240,6 +240,6 @@ export class HashRouter extends Router {
 		root: RouteableRouteGroup | typeof Component,
 		routes?: { [ key: string ]: RouteGroup; }
 	) {
-		super(() => location.hash, () => location.hash.replace('#', ''), value => location.hash = `#${value}`, root, routes);
+		super(() => `#${this.activePath}`, () => location.hash.replace('#', ''), value => location.hash = `#${value}`, root, routes);
 	}
 }

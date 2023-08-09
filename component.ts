@@ -17,7 +17,37 @@ export class Component {
 	route: Route;
 	router: Router;
 
-	params: any;
+	params = new Proxy<any>({}, {
+		set(object, property, value) {
+			// re-generate parameter string
+			let path = this.route.matchingPath.replace(`:${property.toString()}`, value);
+
+			// Update path for each route
+			function updatePath(component: Component, layerIndex: number, path: string) {
+				let route = component.route;
+
+				for (let parentIndex = 0; parentIndex < layerIndex; parentIndex++) {
+					route = route.parent;
+				}
+
+				route.path = path;
+
+				if (component.child) {
+					updatePath(component.child, layerIndex + 1, path);
+				}
+			}
+
+			updatePath(this, 0, path);
+
+			// push the state to the browser (will not call `onhashchange`)
+			history.pushState(null, null, this.router.urlPath);
+
+			object[property] = value;
+
+			return true;
+		}
+	});
+
 	parent?: Component;
 	rootNode: Node;
 
@@ -262,43 +292,5 @@ export class Component {
 		}
 
 		return tree;
-	}
-
-	updateParameters(parameters) {
-		// update current parameter list
-		for (let key in parameters) {
-			if (parameters[key] === null) {
-				delete this.params[key];
-			} else {
-				this.params[key] = `${parameters[key]}`;
-			}
-		}
-
-		// re-generate parameter string
-		let path = this.route.matchingPath;
-
-		for (let key in this.params) {
-			path = path.replace(`:${key}`, this.params[key]);
-		}
-
-		// Update path for each route
-		function updatePath(component: Component, layerIndex: number, path: string) {
-			let route = component.route;
-
-			for (let parentIndex = 0; parentIndex < layerIndex; parentIndex++) {
-				route = route.parent;
-			}
-
-			route.path = path;
-
-			if (component.child) {
-				updatePath(component.child, layerIndex + 1, path);
-			}
-		}
-
-		updatePath(this, 0, path);
-
-		// push the state to the browser (will not call `onhashchange`)
-		history.pushState(null, null, this.router.urlPath);
 	}
 }
